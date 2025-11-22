@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>浪漫留言板 | Love Messages ❤️</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Dancing+Script:wght@400;700&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #ffd3a5 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      font-family: 'Noto Sans SC', sans-serif;
+      overflow-x: hidden;
+      position: relative;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    /* 飘落的爱心动画 */
+    .heart {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      background: rgba(255,105,180,0.8);
+      transform: rotate(45deg);
+      animation: fall linear infinite;
+      z-index: 1;
+    }
+    .heart:before, .heart:after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: rgba(255,105,180,0.8);
+      border-radius: 50%;
+    }
+    .heart:before {
+      left: -10px;
+    }
+    .heart:after {
+      top: -10px;
+    }
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(405deg);
+        opacity: 0;
+      }
+    }
+    
+    /* 头部区域 */
+    .hero-section {
+      text-align: center;
+      padding: 80px 20px 60px 20px;
+      position: relative;
+      z-index: 10;
+    }
+    .main-title {
+      font-family: 'Pacifico', cursive;
+      font-size: 4.5rem;
+      color: #fff;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+      animation: titleFloat 3s ease-in-out infinite;
+    }
+    @keyframes titleFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+    }
+    .subtitle {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2rem;
+      color: #fff;
+      margin-bottom: 15px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .description {
+      font-size: 1.3rem;
+      color: rgba(255,255,255,0.95);
+      max-width: 800px;
+      margin: 0 auto 40px auto;
+      line-height: 1.8;
+      text-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    }
+    
+    /* 爱情宣言区 */
+    .declaration-section {
+      max-width: 900px;
+      margin: 0 auto 60px auto;
+      padding: 50px 30px;
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(10px);
+      border-radius: 30px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      position: relative;
+      z-index: 10;
+    }
+    .declaration-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2.8rem;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 35px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .declaration-text {
+      font-size: 1.4rem;
+      color: #fff;
+      line-height: 2.2;
+      text-align: center;
+      margin-bottom: 25px;
+      text-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    }
+    .love-poem {
+      background: rgba(255,255,255,0.2);
+      padding: 30px;
+      border-radius: 20px;
+      margin: 30px 0;
+      border-left: 5px solid rgba(255,105,180,0.8);
+    }
+    .poem-line {
+      font-size: 1.3rem;
+      color: #fff;
+      line-height: 2;
+      text-align: center;
+      font-style: italic;
+      margin: 10px 0;
+    }
+    
+    /* 留言板区域 */
+    .messages-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px 80px 20px;
+      position: relative;
+      z-index: 10;
+    }
+    .section-title {
+      font-family: 'Pacifico', cursive;
+      font-size: 3.5rem;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 50px;
+      text-shadow: 0 3px 15px rgba(0,0,0,0.3);
+    }
+    .messages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+    .message-card {
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(15px);
+      border-radius: 25px;
+      padding: 35px 28px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      border: 1px solid rgba(255,255,255,0.18);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+    .message-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 15px 40px 0 rgba(31, 38, 135, 0.5);
+    }
+    .message-card::before {
+      content: '❤️';
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 2rem;
+      opacity: 0.6;
+    }
+    .message-content {
+      font-size: 1.35rem;
+      color: #fff;
+      line-height: 1.9;
+      margin-bottom: 25px;
+      min-height: 100px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .message-btn {
+      display: block;
+      width: 100%;
+      background: linear-gradient(90deg, #ff6b9d 0%, #c06c84 100%);
+      color: #fff;
+      border: none;
+      border-radius: 15px;
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      font-family: 'Dancing Script', cursive;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px 0 rgba(255,107,157,0.4);
+    }
+    .message-btn:hover {
+      background: linear-gradient(90deg, #ff8fab 0%, #d07a91 100%);
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px 0 rgba(255,107,157,0.6);
+    }
+    
+    /* 爱情故事时间轴 */
+    .timeline-section {
+      max-width: 900px;
+      margin: 80px auto;
+      padding: 50px 30px;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 30px;
+      position: relative;
+      z-index: 10;
+    }
+    .timeline-title {
+      font-family: 'Pacifico', cursive;
+      font-size: 3rem;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 50px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .timeline-item {
+      display: flex;
+      gap: 25px;
+      margin-bottom: 40px;
+      align-items: flex-start;
+    }
+    .timeline-date {
+      min-width: 140px;
+      background: rgba(255,105,180,0.8);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 15px;
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(255,105,180,0.4);
+    }
+    .timeline-content {
+      flex: 1;
+      background: rgba(255,255,255,0.3);
+      padding: 25px;
+      border-radius: 20px;
+      color: #fff;
+      font-size: 1.2rem;
+      line-height: 1.8;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    /* 页脚 */
+    .footer {
+      text-align: center;
+      padding: 50px 20px;
+      background: rgba(0,0,0,0.2);
+      color: #fff;
+      font-size: 1.2rem;
+      position: relative;
+      z-index: 10;
+    }
+    .footer-heart {
+      font-size: 2rem;
+      animation: heartbeat 1.5s ease infinite;
+      display: inline-block;
+      margin: 0 10px;
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.2); }
+      50% { transform: scale(1); }
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .main-title { font-size: 3rem; }
+      .subtitle { font-size: 1.5rem; }
+      .description { font-size: 1.1rem; }
+      .section-title { font-size: 2.5rem; }
+      .declaration-title { font-size: 2rem; }
+      .messages-grid { grid-template-columns: 1fr; }
+      .timeline-item { flex-direction: column; }
+      .timeline-date { min-width: auto; }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- 飘落的爱心 -->
+  <script>
+    for(let i = 0; i < 15; i++) {
+      let heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.style.left = Math.random() * 100 + '%';
+      heart.style.animationDuration = (Math.random() * 3 + 5) + 's';
+      heart.style.animationDelay = Math.random() * 5 + 's';
+      heart.style.opacity = Math.random() * 0.5 + 0.3;
+      document.body.appendChild(heart);
+    }
+  </script>
+  
+  <!-- 头部英雄区 -->
+  <div class="hero-section">
+    <h1 class="main-title">Love Messages ❤️</h1>
+    <p class="subtitle">愿所有美好与温柔，都能如约而至</p>
+    <p class="description">
+      在这个充满爱意的留言板上，每一段文字都承载着最真挚的情感。
+      让我们用最温柔的语言，记录下彼此心中最浪漫的瞬间。
+      爱情就像星辰大海，永远璀璨而深邃。
+    </p>
+  </div>
+  
+  <!-- 爱情宣言区 -->
+  <div class="declaration-section">
+    <h2 class="declaration-title">爱的宣言 Love Declaration</h2>
+    <p class="declaration-text">
+      💕 在茫茫人海中遇见你，是我此生最美的意外。
+    </p>
+    <p class="declaration-text">
+      🌹 愿与你共赏春花秋月，执手相伴至白头。
+    </p>
+    <p class="declaration-text">
+      ✨ 你是我心中永恒的光，照亮我生命的每一个角落。
+    </p>
+    
+    <div class="love-poem">
+      <p class="poem-line">山有木兮木有枝，心悦君兮君不知。</p>
+      <p class="poem-line">愿得一心人，白首不相离。</p>
+      <p class="poem-line">两情若是久长时，又岂在朝朝暮暮。</p>
+      <p class="poem-line">执子之手，与子偕老。</p>
+    </div>
+    
+    <p class="declaration-text">
+      💝 每一次心跳，都在诉说着对你的思念与爱恋。
+    </p>
+    <p class="declaration-text">
+      🌈 感谢命运让我们相遇，让我有幸陪你走过四季轮回。
+    </p>
+  </div>
+  
+  <!-- 留言板区域 -->
+  <div class="messages-wrapper">
+    <h2 class="section-title">爱的留言 Love Notes</h2>
+    <div class="messages-grid" id="messagesGrid"></div>
+  </div>
+  
+  <!-- 爱情故事时间轴 -->
+  <div class="timeline-section">
+    <h2 class="timeline-title">我们的故事 Our Story</h2>
+    
+    <div class="timeline-item">
+      <div class="timeline-date">2024.01.14</div>
+      <div class="timeline-content">
+        那天下着细雨，我们在咖啡馆第一次相遇。你的笑容就像冬日里的暖阳，融化了我的心。
+      </div>
+    </div>
+    
+    <div class="timeline-item">
+      <div class="timeline-date">2024.02.14</div>
+      <div class="timeline-content">
+        情人节那天，我鼓起勇气向你表白。当你说"我也喜欢你"的时候，感觉整个世界都亮了。
+      </div>
+    </div>
+    
+    <div class="timeline-item">
+      <div class="timeline-date">2024.05.20</div>
+      <div class="timeline-content">
+        我们一起去看了海，在夕阳下许下誓言：要永远在一起，不离不弃。
+      </div>
+    </div>
+    
+    <div class="timeline-item">
+      <div class="timeline-date">2024.08.07</div>
+      <div class="timeline-content">
+        七夕节我们穿着情侣装在游乐园度过了最快乐的一天，你说这是你收到的最好的礼物。
+      </div>
+    </div>
+    
+    <div class="timeline-item">
+      <div class="timeline-date">2024.11.22</div>
+      <div class="timeline-content">
+        为你创建了这个专属的浪漫留言板，希望记录下我们的每一个美好瞬间，直到永远。
+      </div>
+    </div>
+  </div>
+  
+  <!-- 页脚 -->
+  <div class="footer">
+    <p>💌 用心书写每一份爱意 💌</p>
+    <p>
+      <span class="footer-heart">❤️</span>
+      Forever Love
+      <span class="footer-heart">❤️</span>
+    </p>
+    <p style="margin-top: 20px; font-size: 1rem; opacity: 0.8;">
+      © 2025 Love Messages. Made with love.
+    </p>
+  </div>
+  
+  <!-- JavaScript 读取留言 -->
+  <script>
+    const messagesFile = "messages.txt";
+    
+    fetch(messagesFile)
+      .then(res => res.text())
+      .then(txt => {
+        let messages = txt.split("---").map(s => s.trim()).filter(s => s.length > 0);
+        
+        if(messages.length === 0) {
+          messages = [
+            '💕 你是我心中最温柔的存在，每一天都想和你在一起。',
+            '🌟 与你相遇，是我人生中最美的奇迹。',
+            '💝 爱你，是我做过最对的决定。'
+          ];
+        }
+        
+        let grid = document.getElementById("messagesGrid");
+        messages.forEach((msg, index) => {
+          let card = document.createElement("div");
+          card.className = "message-card";
+          card.style.animationDelay = (index * 0.1) + "s";
+          
+          let content = document.createElement("div");
+          content.className = "message-content";
+          content.innerText = msg;
+          
+          let btn = document.createElement("button");
+          btn.className = "message-btn";
+          btn.innerText = "💌 写下你的爱意";
+          btn.onclick = function() {
+            window.location.href = `mailto:aoiud543@gmail.com?subject=来自留言板的爱意&body=${encodeURIComponent(msg + '\n\n————————\n我也想对你说：\n')}`;
+          };
+          
+          card.appendChild(content);
+          card.appendChild(btn);
+          grid.appendChild(card);
+        });
+      })
+      .catch(err => {
+        document.getElementById("messagesGrid").innerHTML = 
+          '<div class="message-card"><div class="message-content">留言加载中，请确保 messages.txt 文件存在...</div></div>';
+      });
+  </script>
+  
+</body>
+</html>

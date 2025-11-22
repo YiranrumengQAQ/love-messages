@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>医学检验技术专业课程表 | Material Design</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <title>教务系统 - 课程表查询</title>
   <style>
     * {
       margin: 0;
@@ -14,565 +12,609 @@
     }
     
     body {
-      font-family: 'Roboto', 'Noto Sans SC', sans-serif;
-      background: #f5f5f5;
+      font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+      background: #f0f2f5;
       min-height: 100vh;
-      padding: 16px;
     }
     
-    .container {
-      max-width: 1600px;
+    /* 顶部导航栏 */
+    .top-bar {
+      background: linear-gradient(135deg, #1e5fa7 0%, #2874c5 100%);
+      height: 60px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .top-bar-content {
+      max-width: 1400px;
       margin: 0 auto;
-    }
-    
-    /* Google Material Design 头部 */
-    .header {
-      background: #fff;
-      border-radius: 8px;
-      padding: 24px 32px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      animation: slideDown 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
-    }
-    
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .header-title {
-      font-size: 1.75rem;
-      font-weight: 500;
-      color: #202124;
-      margin-bottom: 4px;
+      height: 100%;
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      padding: 0 30px;
     }
     
-    .header-subtitle {
-      font-size: 0.95rem;
-      color: #5f6368;
-      font-weight: 400;
-    }
-    
-    /* 控制面板 */
-    .control-panel {
-      background: #fff;
-      border-radius: 8px;
-      padding: 16px 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      align-items: center;
-      animation: fadeIn 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) 0.1s both;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    
-    .control-group {
+    .logo-section {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 15px;
     }
     
-    .control-label {
-      font-weight: 500;
-      color: #202124;
-      font-size: 0.9rem;
+    .logo {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 6px;
       display: flex;
       align-items: center;
-      gap: 6px;
-    }
-    
-    .material-icons {
+      justify-content: center;
       font-size: 20px;
+      font-weight: bold;
+      color: #2874c5;
     }
     
-    .week-selector {
-      padding: 10px 16px;
-      border: 1px solid #dadce0;
+    .system-title {
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    
+    .user-info {
+      color: white;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .user-info span {
+      padding: 6px 16px;
+      background: rgba(255,255,255,0.2);
       border-radius: 4px;
-      font-size: 0.95rem;
-      background: #fff;
-      color: #202124;
+    }
+    
+    /* 面包屑导航 */
+    .breadcrumb {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 12px 0;
+    }
+    
+    .breadcrumb-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 30px;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .breadcrumb-content a {
+      color: #2874c5;
+      text-decoration: none;
+    }
+    
+    .breadcrumb-content a:hover {
+      text-decoration: underline;
+    }
+    
+    /* 主容器 */
+    .container {
+      max-width: 1400px;
+      margin: 20px auto;
+      padding: 0 30px;
+    }
+    
+    /* 功能卡片 */
+    .function-card {
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      background: linear-gradient(to right, #f8f9fa, #ffffff);
+      border-bottom: 2px solid #2874c5;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .card-header-icon {
+      width: 4px;
+      height: 18px;
+      background: #2874c5;
+      border-radius: 2px;
+    }
+    
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    /* 查询表单 */
+    .query-form {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .form-label {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .form-label::before {
+      content: "*";
+      color: #e74c3c;
+      margin-right: 4px;
+      font-weight: bold;
+    }
+    
+    .form-select {
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 14px;
+      min-width: 200px;
+      background: white;
       cursor: pointer;
       transition: all 0.2s;
-      font-family: 'Roboto', 'Noto Sans SC', sans-serif;
     }
     
-    .week-selector:hover {
-      border-color: #1a73e8;
-      background: #f8f9fa;
+    .form-select:hover {
+      border-color: #2874c5;
     }
     
-    .week-selector:focus {
+    .form-select:focus {
       outline: none;
-      border-color: #1a73e8;
-      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+      border-color: #2874c5;
+      box-shadow: 0 0 0 3px rgba(40, 116, 197, 0.1);
     }
     
-    .today-btn {
-      padding: 10px 24px;
-      background: #1a73e8;
-      color: white;
+    .btn {
+      padding: 9px 24px;
       border: none;
       border-radius: 4px;
-      font-size: 0.9rem;
-      font-weight: 500;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      font-weight: 500;
+    }
+    
+    .btn-primary {
+      background: #2874c5;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1e5fa7;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    
+    /* 信息栏 */
+    .info-bar {
+      background: #e8f4fd;
+      border-left: 4px solid #2874c5;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #333;
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-family: 'Roboto', 'Noto Sans SC', sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      gap: 8px;
     }
     
-    .today-btn:hover {
-      background: #1765cc;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    .info-icon {
+      color: #2874c5;
+      font-weight: bold;
     }
     
-    .today-btn:active {
-      background: #1557b0;
-    }
-    
-    /* 信息卡片 */
-    .info-card {
-      background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
-      color: white;
-      padding: 20px 28px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
-      animation: fadeIn 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) 0.2s both;
-    }
-    
-    .current-date {
-      font-size: 1.2rem;
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-    
-    .current-week-info {
-      font-size: 0.95rem;
-      opacity: 0.95;
-    }
-    
-    /* 统计卡片 */
-    .stats-grid {
+    /* 统计栏 */
+    .stats-bar {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 16px;
-      animation: fadeIn 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) 0.3s both;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
     }
     
-    .stat-card {
-      background: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    .stat-item {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
       transition: all 0.2s;
     }
     
-    .stat-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    .stat-item:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       transform: translateY(-2px);
     }
     
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 500;
-      color: #1a73e8;
-      line-height: 1;
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: linear-gradient(135deg, #2874c5, #1e5fa7);
+      color: white;
+    }
+    
+    .stat-content {
+      flex: 1;
     }
     
     .stat-label {
-      font-size: 0.85rem;
-      color: #5f6368;
-      margin-top: 8px;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 4px;
     }
     
-    /* 课程表容器 */
-    .table-container {
-      background: #fff;
-      border-radius: 8px;
-      padding: 24px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      overflow-x: auto;
-      animation: fadeIn 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) 0.4s both;
-      margin-bottom: 16px;
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #2874c5;
     }
     
     /* 课程表 */
+    .schedule-wrapper {
+      overflow-x: auto;
+    }
+    
     .schedule-table {
       width: 100%;
       border-collapse: collapse;
       min-width: 900px;
+      background: white;
     }
     
     .schedule-table th,
     .schedule-table td {
-      padding: 16px;
+      border: 1px solid #d1d5db;
+      padding: 12px;
       text-align: center;
-      border: 1px solid #e0e0e0;
-      transition: all 0.2s;
+      font-size: 14px;
     }
     
-    /* 表头 */
     .schedule-table thead th {
-      background: #1a73e8;
-      color: white;
-      font-weight: 500;
-      font-size: 1rem;
+      background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+      color: #333;
+      font-weight: 600;
       position: sticky;
       top: 0;
       z-index: 10;
     }
     
     .schedule-table thead th:first-child {
-      border-top-left-radius: 8px;
+      background: linear-gradient(to bottom, #2874c5, #1e5fa7);
+      color: white;
     }
     
-    .schedule-table thead th:last-child {
-      border-top-right-radius: 8px;
-    }
-    
-    /* 时间列 */
     .time-cell {
       background: #f8f9fa;
-      font-weight: 500;
-      color: #202124;
-      font-size: 0.9rem;
+      font-weight: 600;
+      color: #333;
       min-width: 100px;
     }
     
-    /* 课程单元格 */
     .course-cell {
-      background: #fff;
+      background: white;
       min-width: 140px;
-      cursor: pointer;
       vertical-align: middle;
+      transition: all 0.2s;
+      cursor: pointer;
     }
     
     .course-cell:hover {
-      background: #e8f0fe;
+      background: #f0f9ff;
     }
     
     .course-cell.today-column {
-      background: #e8f0fe;
-      border-left: 3px solid #1a73e8;
-      border-right: 3px solid #1a73e8;
+      background: #fef3c7;
+      border-left: 3px solid #f59e0b;
+      border-right: 3px solid #f59e0b;
+    }
+    
+    .course-cell.has-course {
+      background: #e8f4fd;
+    }
+    
+    .course-cell.has-course:hover {
+      background: #d1e8f7;
     }
     
     .course-name {
-      font-weight: 500;
-      color: #202124;
-      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1e40af;
       margin-bottom: 6px;
-      line-height: 1.3;
+      font-size: 13px;
+      line-height: 1.4;
     }
     
     .course-teacher {
-      font-size: 0.8rem;
-      color: #5f6368;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    
+    .course-location {
+      font-size: 11px;
+      color: #999;
+      font-style: italic;
     }
     
     .no-course {
-      color: #9aa0a6;
-      font-size: 0.85rem;
+      color: #9ca3af;
+      font-size: 13px;
     }
     
     /* 今日标记 */
-    .today-marker {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      background: #1a73e8;
+    .today-badge {
+      display: inline-block;
+      background: #f59e0b;
       color: white;
       padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 0.7rem;
+      border-radius: 3px;
+      font-size: 11px;
+      margin-left: 6px;
       font-weight: 500;
-      text-transform: uppercase;
     }
     
-    /* 教师面板 */
-    .teachers-panel {
-      background: #fff;
-      border-radius: 8px;
-      padding: 24px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      animation: fadeIn 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) 0.5s both;
+    /* 页脚 */
+    .footer {
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      padding: 20px 0;
+      margin-top: 30px;
+      text-align: center;
+      font-size: 13px;
+      color: #666;
     }
     
-    .panel-title {
-      font-size: 1.25rem;
-      font-weight: 500;
-      color: #202124;
-      margin-bottom: 20px;
+    .footer-links {
+      margin-bottom: 10px;
+    }
+    
+    .footer-links a {
+      color: #2874c5;
+      text-decoration: none;
+      margin: 0 15px;
+    }
+    
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+    
+    /* 打印按钮 */
+    .toolbar {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      gap: 10px;
+      margin-bottom: 15px;
     }
     
-    .teachers-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 12px;
-    }
-    
-    .teacher-item {
-      background: #f8f9fa;
-      padding: 14px 16px;
-      border-radius: 4px;
-      border-left: 4px solid #1a73e8;
-      transition: all 0.2s;
-    }
-    
-    .teacher-item:hover {
-      background: #e8f0fe;
-      transform: translateX(4px);
-    }
-    
-    .teacher-course {
-      font-weight: 500;
-      color: #202124;
-      margin-bottom: 4px;
-      font-size: 0.9rem;
-    }
-    
-    .teacher-name {
-      color: #5f6368;
-      font-size: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+    @media print {
+      .top-bar, .breadcrumb, .query-form, .toolbar, .footer {
+        display: none;
+      }
     }
     
     /* 响应式 */
     @media (max-width: 768px) {
-      .header { padding: 16px 20px; }
-      .header-title { font-size: 1.4rem; }
-      .control-panel { flex-direction: column; align-items: stretch; }
-      .control-group { flex-direction: column; align-items: stretch; }
-      .table-container { padding: 12px; }
-      .schedule-table th, .schedule-table td { padding: 10px; font-size: 0.85rem; }
+      .container { padding: 0 15px; }
+      .top-bar-content { padding: 0 15px; }
+      .system-title { font-size: 16px; }
+      .query-form { flex-direction: column; align-items: stretch; }
+      .form-select { min-width: 100%; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- 头部 -->
-    <div class="header">
-      <div class="header-title">
-        <span class="material-icons">school</span>
-        2025级医学检验技术专业（1）班课程表
+  <!-- 顶部导航栏 -->
+  <div class="top-bar">
+    <div class="top-bar-content">
+      <div class="logo-section">
+        <div class="logo">📚</div>
+        <div class="system-title">教务管理系统</div>
       </div>
-      <div class="header-subtitle">2025年秋季学期 | Google Material Design</div>
-    </div>
-    
-    <!-- 控制面板 -->
-    <div class="control-panel">
-      <div class="control-group">
-        <span class="control-label">
-          <span class="material-icons">event</span>
-          选择周次
-        </span>
-        <select class="week-selector" id="weekSelector">
-          <option value="2">第2周 (9.8～9.14)</option>
-          <option value="7～9">第7～9周 (10.13～11.2)</option>
-          <option value="10～11">第10～11周 (11.3～11.16)</option>
-          <option value="12～13">第12～13周 (11.17～11.30)</option>
-          <option value="14～15">第14～15周 (12.1～12.14)</option>
-          <option value="16～17">第16～17周 (12.15～12.28)</option>
-          <option value="18">第18周 (12.29～25.1.4)</option>
-        </select>
+      <div class="user-info">
+        <span>👤 学生：25检1班</span>
+        <span>📅 2025年秋季学期</span>
       </div>
-      
-      <button class="today-btn" onclick="highlightToday()">
-        <span class="material-icons">today</span>
-        高亮今日
-      </button>
-    </div>
-    
-    <!-- 信息卡片 -->
-    <div class="info-card">
-      <div class="current-date" id="currentDate"></div>
-      <div class="current-week-info" id="currentWeekInfo">正在加载...</div>
-    </div>
-    
-    <!-- 统计卡片 -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number" id="todayCourses">0</div>
-        <div class="stat-label">今日课程</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="weekCourses">0</div>
-        <div class="stat-label">本周课程</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">12</div>
-        <div class="stat-label">任课教师</div>
-      </div>
-    </div>
-    
-    <!-- 课程表 -->
-    <div class="table-container">
-      <table class="schedule-table">
-        <thead>
-          <tr>
-            <th>时间/星期</th>
-            <th data-day="1">星期一</th>
-            <th data-day="2">星期二</th>
-            <th data-day="3">星期三</th>
-            <th data-day="4">星期四</th>
-            <th data-day="5">星期五</th>
-          </tr>
-        </thead>
-        <tbody id="scheduleBody"></tbody>
-      </table>
-    </div>
-    
-    <!-- 教师信息面板 -->
-    <div class="teachers-panel">
-      <div class="panel-title">
-        <span class="material-icons">people</span>
-        任课教师信息
-      </div>
-      <div class="teachers-grid" id="teachersGrid"></div>
     </div>
   </div>
   
+  <!-- 面包屑导航 -->
+  <div class="breadcrumb">
+    <div class="breadcrumb-content">
+      <a href="#">首页</a> / <a href="#">教学管理</a> / <span>课程表查询</span>
+    </div>
+  </div>
+  
+  <!-- 主容器 -->
+  <div class="container">
+    <!-- 查询卡片 -->
+    <div class="function-card">
+      <div class="card-header">
+        <div class="card-header-icon"></div>
+        <div class="card-title">查询条件</div>
+      </div>
+      <div class="card-body">
+        <div class="query-form">
+          <div class="form-group">
+            <label class="form-label">学期周次</label>
+            <select class="form-select" id="weekSelector">
+              <option value="2">第2周 (9.8～9.14)</option>
+              <option value="7～9">第7～9周 (10.13～11.2)</option>
+              <option value="10～11">第10～11周 (11.3～11.16)</option>
+              <option value="12～13" selected>第12～13周 (11.17～11.30)</option>
+              <option value="14～15">第14～15周 (12.1～12.14)</option>
+              <option value="16～17">第16～17周 (12.15～12.28)</option>
+              <option value="18">第18周 (12.29～25.1.4)</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" style="opacity: 0;">操作</label>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-primary" onclick="renderSchedule(document.getElementById('weekSelector').value)">🔍 查询</button>
+              <button class="btn btn-secondary" onclick="highlightToday()">⭐ 高亮今日</button>
+              <button class="btn btn-secondary" onclick="window.print()">🖨️ 打印</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 信息提示栏 -->
+    <div class="info-bar">
+      <span class="info-icon">ℹ️</span>
+      <span id="currentInfo">当前日期：<span id="currentDate"></span> | 查看周次：<span id="currentWeekInfo">第12～13周</span></span>
+    </div>
+    
+    <!-- 统计栏 -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-icon">📖</div>
+        <div class="stat-content">
+          <div class="stat-label">今日课程</div>
+          <div class="stat-value" id="todayCourses">0</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon">📚</div>
+        <div class="stat-content">
+          <div class="stat-label">本周课程</div>
+          <div class="stat-value" id="weekCourses">0</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon">👨‍🏫</div>
+        <div class="stat-content">
+          <div class="stat-label">任课教师</div>
+          <div class="stat-value">12</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 课程表卡片 -->
+    <div class="function-card">
+      <div class="card-header">
+        <div class="card-header-icon"></div>
+        <div class="card-title">课程表</div>
+      </div>
+      <div class="card-body">
+        <div class="schedule-wrapper">
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th>节次/星期</th>
+                <th data-day="1">星期一</th>
+                <th data-day="2">星期二</th>
+                <th data-day="3">星期三</th>
+                <th data-day="4">星期四</th>
+                <th data-day="5">星期五</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 教师信息卡片 -->
+    <div class="function-card">
+      <div class="card-header">
+        <div class="card-header-icon"></div>
+        <div class="card-title">任课教师信息</div>
+      </div>
+      <div class="card-body">
+        <table class="schedule-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">序号</th>
+              <th>课程名称</th>
+              <th>任课教师</th>
+              <th>联系方式</th>
+            </tr>
+          </thead>
+          <tbody id="teachersBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 页脚 -->
+  <div class="footer">
+    <div class="footer-links">
+      <a href="#">关于我们</a>
+      <a href="#">帮助中心</a>
+      <a href="#">意见反馈</a>
+      <a href="#">联系我们</a>
+    </div>
+    <div>© 2025 教务管理系统 版权所有 | 技术支持：信息中心</div>
+  </div>
+  
   <script>
-    // 正确提取的课程数据
     const scheduleData = {
-      "2": {
-        "date_range": "9.8～9.14",
-        "schedule": {
-          "星期一": {"上午1-2节": "心理健康", "上午3-4节": "结构机能|解剖", "下午5-6节": "体育", "下午7-8节": ""},
-          "星期二": {"上午1-2节": "医用化学（无机）", "上午3-4节": "习近平思想概论", "下午5-6节": "英语", "下午7-8节": ""},
-          "星期三": {"上午1-2节": "计算机", "上午3-4节": "医用化学（无机）", "下午5-6节": "英语", "下午7-8节": ""},
-          "星期四": {"上午1-2节": "结构机能|解剖", "上午3-4节": "英语", "下午5-6节": "医用化学（无机）", "下午7-8节": ""},
-          "星期五": {"上午1-2节": "计算机", "上午3-4节": "医用化学（无机）", "下午5-6节": "", "下午7-8节": ""}
-        }
-      },
-      "7～9": {
-        "date_range": "10.13～11.2",
-        "schedule": {
-          "星期一": {"上午1-2节": "医用化学（无机）", "上午3-4节": "结构机能|解剖", "下午5-6节": "体育", "下午7-8节": "心理健康"},
-          "星期二": {"上午1-2节": "结构机能|解剖", "上午3-4节": "习近平思想概论", "下午5-6节": "医用化学（无机）", "下午7-8节": "大学生安全"},
-          "星期三": {"上午1-2节": "计算机", "上午3-4节": "英语", "下午5-6节": "职业生涯与创业", "下午7-8节": ""},
-          "星期四": {"上午1-2节": "英语", "上午3-4节": "医用化学（无机）", "下午5-6节": "结构机能|解剖", "下午7-8节": ""},
-          "星期五": {"上午1-2节": "计算机", "上午3-4节": "习近平思想概论", "下午5-6节": "", "下午7-8节": ""}
-        }
-      },
-      "10～11": {
-        "date_range": "11.3～11.16",
-        "schedule": {
-          "星期一": {"上午1-2节": "结构机能|解剖", "上午3-4节": "心理健康", "下午5-6节": "体育", "下午7-8节": "大学生安全"},
-          "星期二": {"上午1-2节": "医用化学（无机）", "上午3-4节": "习近平思想概论", "下午5-6节": "结构机能|生理", "下午7-8节": ""},
-          "星期三": {"上午1-2节": "计算机", "上午3-4节": "医用化学（无机）", "下午5-6节": "心理健康", "下午7-8节": ""},
-          "星期四": {"上午1-2节": "英语", "上午3-4节": "结构机能|生理", "下午5-6节": "结构机能|解剖", "下午7-8节": ""},
-          "星期五": {"上午1-2节": "计算机", "上午3-4节": "习近平思想概论", "下午5-6节": "", "下午7-8节": ""}
-        }
-      },
-      "12～13": {
-        "date_range": "11.17～11.30",
-        "schedule": {
-          "星期一": {"上午1-2节": "结构机能|解剖", "上午3-4节": "心理健康", "下午5-6节": "体育", "下午7-8节": "大学生安全"},
-          "星期二": {"上午1-2节": "医用化学（无机）", "上午3-4节": "习近平思想概论", "下午5-6节": "结构机能|生理", "下午7-8节": ""},
-          "星期三": {"上午1-2节": "计算机", "上午3-4节": "医用化学（无机）", "下午5-6节": "形势与政策", "下午7-8节": ""},
-          "星期四": {"上午1-2节": "英语", "上午3-4节": "结构机能|生理", "下午5-6节": "结构机能|解剖", "下午7-8节": ""},
-          "星期五": {"上午1-2节": "计算机", "上午3-4节": "习近平思想概论", "下午5-6节": "体育(体测)", "下午7-8节": "体育(体测)"}
-        }
-      },
-      "14～15": {
-        "date_range": "12.1～12.14",
-        "schedule": {
-          "星期一": {"上午1-2节": "心理健康", "上午3-4节": "结构机能|解剖", "下午5-6节": "体育", "下午7-8节": "英语"},
-          "星期二": {"上午1-2节": "结构机能|生理", "上午3-4节": "习近平思想概论", "下午5-6节": "四史", "下午7-8节": ""},
-          "星期三": {"上午1-2节": "计算机", "上午3-4节": "结构机能|生理", "下午5-6节": "四史", "下午7-8节": ""},
-          "星期四": {"上午1-2节": "英语", "上午3-4节": "结构机能|解剖", "下午5-6节": "结构机能|生理", "下午7-8节": ""},
-          "星期五": {"上午1-2节": "计算机", "上午3-4节": "习近平思想概论", "下午5-6节": "", "下午7-8节": ""}
-        }
-      },
-      "16～17": {
-        "date_range": "12.15～12.28",
-        "schedule": {
-          "星期一": {"上午1-2节": "心理健康", "上午3-4节": "结构机能|解剖", "下午5-6节": "英语", "下午7-8节": ""},
-          "星期二": {"上午1-2节": "结构机能|生理", "上午3-4节": "习近平思想概论", "下午5-6节": "四史", "下午7-8节": ""},
-          "星期三": {"上午1-2节": "计算机", "上午3-4节": "结构机能|生理", "下午5-6节": "四史", "下午7-8节": ""},
-          "星期四": {"上午1-2节": "英语", "上午3-4节": "结构机能|解剖", "下午5-6节": "结构机能|生理", "下午7-8节": ""},
-          "星期五": {"上午1-2节": "心理健康", "上午3-4节": "习近平思想概论", "下午5-6节": "", "下午7-8节": ""}
-        }
-      },
-      "18": {
-        "date_range": "12.29～25.1.4",
-        "schedule": {
-          "星期一": {"上午1-2节": "计算机", "上午3-4节": "英语", "下午5-6节": "", "下午7-8节": ""},
-          "星期二": {"上午1-2节": "", "上午3-4节": "", "下午5-6节": "", "下午7-8节": ""},
-          "星期三": {"上午1-2节": "", "上午3-4节": "", "下午5-6节": "", "下午7-8节": ""},
-          "星期四": {"上午1-2节": "元旦放假", "上午3-4节": "", "下午5-6节": "", "下午7-8节": ""},
-          "星期五": {"上午1-2节": "", "上午3-4节": "", "下午5-6节": "", "下午7-8节": ""}
-        }
-      }
+      "2": {"date_range": "9.8～9.14", "schedule": {"星期一": {"上午1-2节": "心理健康", "上午3-4节": "结构机能|解剖", "下午5-6节": "体育", "下午7-8节": ""}, "星期二": {"上午1-2节": "医用化学（无机）", "上午3-4节": "习近平思想概论", "下午5-6节": "英语", "下午7-8节": ""}, "星期三": {"上午1-2节": "计算机", "上午3-4节": "医用化学（无机）", "下午5-6节": "英语", "下午7-8节": ""}, "星期四": {"上午1-2节": "结构机能|解剖", "上午3-4节": "英语", "下午5-6节": "医用化学（无机）", "下午7-8节": ""}, "星期五": {"上午1-2节": "计算机", "上午3-4节": "医用化学（无机）", "下午5-6节": "", "下午7-8节": ""}}},
+      "7～9": {"date_range": "10.13～11.2", "schedule": {"星期一": {"上午1-2节": "医用化学（无机）", "上午3-4节": "结构机能|解剖", "下午5-6节": "体育", "下午7-8节": "心理健康"}, "星期二": {"上午1-2节": "结构机能|解剖", "上午3-4节": "习近平思想概论", "下午5-6节": "医用化学（无机）", "下午7-8节": "大学生安全"}, "星期三": {"上午1-2节": "计算机", "上午3-4节": "英语", "下午5-6节": "职业生涯与创业", "下午7-8节": ""}, "星期四": {"上午1-2节": "英语", "上午3-4节": "医用化学（无机）", "下午5-6节": "结构机能|解剖", "下午7-8节": ""}, "星期五": {"上午1-2节": "计算机", "上午3-4节": "习近平思想概论", "下午5-6节": "", "下午7-8节": ""}}},
+      "10～11": {"date_range": "11.3～11.16", "schedule": {"星期一": {"上午1-2节": "结构机能|解剖", "上午3-4节": "心理健康", "下午5-6节": "体育", "下午7-8节": "大学生安全"}, "星期二": {"上午1-2节": "医用化学（无机）", "上午3-4节": "习近平思想概论", "下午5-6节": "结构机能|生理", "下午7-8节": ""}, "星期三": {"上午1-2节": "计算机", "上午3-4节": "医用化学（无机）", "下午5-6节": "心理健康", "下午7-8节": ""}, "星期四": {"上午1-2节": "英语", "上午3-4节": "结构机能|生理", "下午5-6节": "结构机能|解剖", "下午7-8节": ""}, "星期五": {"上午1-2节": "计算机", "上午3-4节": "习近平思想概论", "下午5-6节": "", "下午7-8节": ""}}},
+      "12～13": {"date_range": "11.17～11.30", "schedule": {"星期一": {"上午1-2节": "结构机能|解剖", "上午3-4节": "心理健康", "下午5-6节": "体育", "下午7-8节": "大学生安全"}, "星期二": {"上午1-2节": "医用化学（无机）", "上午3-4节": "习近平思想概论", "下午5-6节": "结构机能|生理", "下午7-8节": ""}, "星期三": {"上午1-2节": "计算机", "上午3-4节": "医用化学（无机）", "下午5-6节": "形势与政策", "下午7-8节": ""}, "星期四": {"上午1-2节": "英语", "上午3-4节": "结构机能|生理", "下午5-6节": "结构机能|解剖", "下午7-8节": ""}, "星期五": {"上午1-2节": "计算机", "上午3-4节": "习近平思想概论", "下午5-6节": "体育(体测)", "下午7-8节": "体育(体测)"}}},
+      "14～15": {"date_range": "12.1～12.14", "schedule": {"星期一": {"上午1-2节": "心理健康", "上午3-4节": "结构机能|解剖", "下午5-6节": "体育", "下午7-8节": "英语"}, "星期二": {"上午1-2节": "结构机能|生理", "上午3-4节": "习近平思想概论", "下午5-6节": "四史", "下午7-8节": ""}, "星期三": {"上午1-2节": "计算机", "上午3-4节": "结构机能|生理", "下午5-6节": "四史", "下午7-8节": ""}, "星期四": {"上午1-2节": "英语", "上午3-4节": "结构机能|解剖", "下午5-6节": "结构机能|生理", "下午7-8节": ""}, "星期五": {"上午1-2节": "计算机", "上午3-4节": "习近平思想概论", "下午5-6节": "", "下午7-8节": ""}}},
+      "16～17": {"date_range": "12.15～12.28", "schedule": {"星期一": {"上午1-2节": "心理健康", "上午3-4节": "结构机能|解剖", "下午5-6节": "英语", "下午7-8节": ""}, "星期二": {"上午1-2节": "结构机能|生理", "上午3-4节": "习近平思想概论", "下午5-6节": "四史", "下午7-8节": ""}, "星期三": {"上午1-2节": "计算机", "上午3-4节": "结构机能|生理", "下午5-6节": "四史", "下午7-8节": ""}, "星期四": {"上午1-2节": "英语", "上午3-4节": "结构机能|解剖", "下午5-6节": "结构机能|生理", "下午7-8节": ""}, "星期五": {"上午1-2节": "心理健康", "上午3-4节": "习近平思想概论", "下午5-6节": "", "下午7-8节": ""}}},
+      "18": {"date_range": "12.29～25.1.4", "schedule": {"星期一": {"上午1-2节": "计算机", "上午3-4节": "英语", "下午5-6节": "", "下午7-8节": ""}, "星期二": {"上午1-2节": "", "上午3-4节": "", "下午5-6节": "", "下午7-8节": ""}, "星期三": {"上午1-2节": "", "上午3-4节": "", "下午5-6节": "", "下午7-8节": ""}, "星期四": {"上午1-2节": "元旦放假", "上午3-4节": "", "下午5-6节": "", "下午7-8节": ""}, "星期五": {"上午1-2节": "", "上午3-4节": "", "下午5-6节": "", "下午7-8节": ""}}}
     };
     
-    const teachers = {
-      "大学生安全": "付聪",
-      "习近平思想概论": "李佳熹",
-      "形势与政策": "郝岩",
-      "四史": "赵艺",
-      "体育": "杨萍",
-      "英语": "王英",
-      "心理健康": "石婧",
-      "计算机": "徐超",
-      "职业生涯与创业": "刘静",
-      "医用化学（无机）": "刘亚玲、吴松",
-      "结构机能|解剖": "王庆文",
-      "结构机能|生理": "权海华"
-    };
+    const teachers = {"大学生安全": "付聪", "习近平思想概论": "李佳熹", "形势与政策": "郝岩", "四史": "赵艺", "体育": "杨萍", "英语": "王英", "心理健康": "石婧", "计算机": "徐超", "职业生涯与创业": "刘静", "医用化学（无机）": "刘亚玲、吴松", "结构机能|解剖": "王庆文", "结构机能|生理": "权海华"};
     
     const timeSlots = ["上午1-2节", "上午3-4节", "下午5-6节", "下午7-8节"];
     
-    // 更新当前日期
     function updateCurrentDate() {
       const now = new Date();
-      const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-      document.getElementById('currentDate').textContent = '📅 ' + now.toLocaleDateString('zh-CN', options);
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', {year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'});
     }
     
-    // 渲染课程表
     function renderSchedule(weekKey) {
       const tbody = document.getElementById('scheduleBody');
       tbody.innerHTML = '';
-      
       const weekData = scheduleData[weekKey];
       if (!weekData) return;
       
-      document.getElementById('currentWeekInfo').textContent = `当前查看: 第${weekKey}周 (${weekData.date_range})`;
-      
+      document.getElementById('currentWeekInfo').textContent = `第${weekKey}周 (${weekData.date_range})`;
       let totalCourses = 0;
       
       timeSlots.forEach(timeSlot => {
         const row = document.createElement('tr');
-        
         const timeCell = document.createElement('td');
         timeCell.className = 'time-cell';
         timeCell.textContent = timeSlot;
@@ -587,22 +629,19 @@
           const course = daySchedule ? daySchedule[timeSlot] : '';
           
           if (course && course.trim() !== '') {
+            cell.classList.add('has-course');
             const teacher = teachers[course] || teachers[course.split('|')[0]] || '待定';
             cell.innerHTML = `
               <div class="course-name">${course}</div>
-              <div class="course-teacher">
-                <span class="material-icons" style="font-size: 14px;">person</span>
-                ${teacher}
-              </div>
+              <div class="course-teacher">👨‍🏫 ${teacher}</div>
+              <div class="course-location">📍 待安排</div>
             `;
             totalCourses++;
           } else {
             cell.innerHTML = '<div class="no-course">—</div>';
           }
-          
           row.appendChild(cell);
         });
-        
         tbody.appendChild(row);
       });
       
@@ -610,68 +649,45 @@
       highlightToday();
     }
     
-    // 高亮今日
     function highlightToday() {
       const today = new Date().getDay();
-      
-      document.querySelectorAll('.today-column').forEach(el => {
-        el.classList.remove('today-column');
-        const marker = el.querySelector('.today-marker');
-        if (marker) marker.remove();
-      });
+      document.querySelectorAll('.today-column').forEach(el => el.classList.remove('today-column'));
+      document.querySelectorAll('.today-badge').forEach(el => el.remove());
       
       if (today >= 1 && today <= 5) {
-        const headers = document.querySelectorAll('thead th[data-day]');
-        headers.forEach(th => {
-          if (parseInt(th.dataset.day) === today) {
-            th.style.position = 'relative';
-            const marker = document.createElement('span');
-            marker.className = 'today-marker';
-            marker.textContent = 'TODAY';
-            th.appendChild(marker);
-          }
+        document.querySelectorAll(`thead th[data-day="${today}"]`).forEach(th => {
+          const badge = document.createElement('span');
+          badge.className = 'today-badge';
+          badge.textContent = '今天';
+          th.appendChild(badge);
         });
         
         let todayCourses = 0;
-        const cells = document.querySelectorAll(`.course-cell[data-day="${today}"]`);
-        cells.forEach(cell => {
+        document.querySelectorAll(`.course-cell[data-day="${today}"]`).forEach(cell => {
           cell.classList.add('today-column');
-          if (!cell.querySelector('.no-course')) {
-            todayCourses++;
-          }
+          if (cell.classList.contains('has-course')) todayCourses++;
         });
-        
         document.getElementById('todayCourses').textContent = todayCourses;
       } else {
         document.getElementById('todayCourses').textContent = 0;
       }
     }
     
-    // 渲染教师信息
     function renderTeachers() {
-      const grid = document.getElementById('teachersGrid');
-      grid.innerHTML = '';
-      
-      Object.entries(teachers).forEach(([course, teacher]) => {
-        const item = document.createElement('div');
-        item.className = 'teacher-item';
-        item.innerHTML = `
-          <div class="teacher-course">${course}</div>
-          <div class="teacher-name">
-            <span class="material-icons" style="font-size: 16px;">account_circle</span>
-            ${teacher}
-          </div>
+      const tbody = document.getElementById('teachersBody');
+      tbody.innerHTML = '';
+      Object.entries(teachers).forEach(([course, teacher], index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td style="text-align: left; padding-left: 20px;">${course}</td>
+          <td>${teacher}</td>
+          <td style="color: #999;">暂无</td>
         `;
-        grid.appendChild(item);
+        tbody.appendChild(row);
       });
     }
     
-    // 事件监听
-    document.getElementById('weekSelector').addEventListener('change', (e) => {
-      renderSchedule(e.target.value);
-    });
-    
-    // 初始化
     updateCurrentDate();
     renderSchedule('12～13');
     renderTeachers();

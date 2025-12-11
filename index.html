@@ -27,6 +27,166 @@
       50% { background-position: 100% 50%; }
     }
 
+    /* 侧边栏计算器 */
+    .calculator-toggle {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, #6b9080, #4a7c68);
+      color: white;
+      padding: 15px 8px;
+      border-radius: 12px 0 0 12px;
+      cursor: pointer;
+      z-index: 10000;
+      box-shadow: -4px 0 16px rgba(107, 144, 128, 0.4);
+      writing-mode: vertical-rl;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .calculator-toggle:hover {
+      padding-right: 12px;
+      box-shadow: -6px 0 24px rgba(107, 144, 128, 0.6);
+    }
+
+    .calculator-sidebar {
+      position: fixed;
+      right: -320px;
+      top: 0;
+      width: 320px;
+      height: 100vh;
+      background: white;
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
+      transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .calculator-sidebar.open {
+      right: 0;
+    }
+
+    .calc-header {
+      background: linear-gradient(135deg, #6b9080, #4a7c68);
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .calc-header h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .calc-close {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.3s;
+    }
+
+    .calc-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+    }
+
+    .calc-body {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      background: #f8faf9;
+    }
+
+    .calc-display {
+      background: white;
+      border: 2px solid #d4e8e0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: right;
+      font-size: 32px;
+      font-weight: 700;
+      color: #2d4a3e;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      word-break: break-all;
+    }
+
+    .calc-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      flex: 1;
+    }
+
+    .calc-btn {
+      background: white;
+      border: 2px solid #d4e8e0;
+      border-radius: 12px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #2d4a3e;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-height: 60px;
+    }
+
+    .calc-btn:hover {
+      background: #f0f7f4;
+      border-color: #6b9080;
+      transform: scale(1.05);
+    }
+
+    .calc-btn:active {
+      transform: scale(0.95);
+    }
+
+    .calc-btn.operator {
+      background: linear-gradient(135deg, #a8e6cf, #88d4ab);
+      color: #2d4a3e;
+      border: none;
+    }
+
+    .calc-btn.operator:hover {
+      background: linear-gradient(135deg, #88d4ab, #6b9080);
+      color: white;
+    }
+
+    .calc-btn.clear {
+      background: linear-gradient(135deg, #ff8a80, #ff6b6b);
+      color: white;
+      border: none;
+    }
+
+    .calc-btn.clear:hover {
+      background: linear-gradient(135deg, #ff6b6b, #ff5252);
+    }
+
+    .calc-btn.equals {
+      background: linear-gradient(135deg, #6b9080, #4a7c68);
+      color: white;
+      border: none;
+      grid-column: span 2;
+    }
+
+    .calc-btn.equals:hover {
+      background: linear-gradient(135deg, #4a7c68, #3a6c58);
+    }
+
     /* 验证码遮罩层 */
     #captchaOverlay {
       position: fixed;
@@ -244,6 +404,25 @@
     .error-message.show {
       display: block;
       animation: fadeIn 0.3s;
+    }
+
+    .debug-info {
+      background: #f0f7f4;
+      border: 1px solid #d4e8e0;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 11px;
+      color: #6b9080;
+      text-align: left;
+      font-family: monospace;
+      max-height: 100px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .debug-info.show {
+      display: block;
     }
 
     @keyframes fadeIn {
@@ -736,7 +915,7 @@
         background: white;
         padding: 0;
       }
-      .control-panel, .stats-grid, .btn-group, .notice-banner, .exam-banner {
+      .control-panel, .stats-grid, .btn-group, .notice-banner, .exam-banner, .calculator-toggle, .calculator-sidebar {
         display: none;
       }
       .glass-card {
@@ -773,10 +952,54 @@
         padding: 12px;
         font-size: 18px;
       }
+      .calculator-sidebar {
+        width: 100%;
+        right: -100%;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- 计算器按钮 -->
+  <div class="calculator-toggle" onclick="toggleCalculator()">
+    🧮 计算器
+  </div>
+
+  <!-- 侧边栏计算器 -->
+  <div class="calculator-sidebar" id="calculatorSidebar">
+    <div class="calc-header">
+      <h3>🧮 计算器</h3>
+      <button class="calc-close" onclick="toggleCalculator()">✕</button>
+    </div>
+    <div class="calc-body">
+      <div class="calc-display" id="calcDisplay">0</div>
+      <div class="calc-buttons">
+        <button class="calc-btn clear" onclick="calcClear()">C</button>
+        <button class="calc-btn operator" onclick="calcInput('/')">/</button>
+        <button class="calc-btn operator" onclick="calcInput('*')">×</button>
+        <button class="calc-btn operator" onclick="calcBackspace()">⌫</button>
+
+        <button class="calc-btn" onclick="calcInput('7')">7</button>
+        <button class="calc-btn" onclick="calcInput('8')">8</button>
+        <button class="calc-btn" onclick="calcInput('9')">9</button>
+        <button class="calc-btn operator" onclick="calcInput('-')">-</button>
+
+        <button class="calc-btn" onclick="calcInput('4')">4</button>
+        <button class="calc-btn" onclick="calcInput('5')">5</button>
+        <button class="calc-btn" onclick="calcInput('6')">6</button>
+        <button class="calc-btn operator" onclick="calcInput('+')">+</button>
+
+        <button class="calc-btn" onclick="calcInput('1')">1</button>
+        <button class="calc-btn" onclick="calcInput('2')">2</button>
+        <button class="calc-btn" onclick="calcInput('3')">3</button>
+        <button class="calc-btn" onclick="calcInput('0')">0</button>
+
+        <button class="calc-btn equals" onclick="calcEquals()">=</button>
+        <button class="calc-btn" onclick="calcInput('.')">.</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 验证码遮罩层 -->
   <div id="captchaOverlay">
     <div class="captcha-container">
@@ -786,6 +1009,8 @@
       <div class="error-message" id="errorMessage">
         验证码错误，请重新输入！
       </div>
+
+      <div class="debug-info" id="debugInfo"></div>
 
       <div class="captcha-image-box" id="captchaImageBox">
         <p class="captcha-loading">加载中...</p>
@@ -964,11 +1189,70 @@
   </div>
 
   <script>
-    // 验证码相关变量
-    let currentCaptchaId = '';
-    let correctAnswer = '';
+    // ============ 计算器功能 ============
+    let calcValue = '0';
+    let calcOperator = '';
+    let calcPrevValue = '';
 
-    // 虚拟键盘输入
+    function toggleCalculator() {
+      document.getElementById('calculatorSidebar').classList.toggle('open');
+    }
+
+    function calcInput(value) {
+      if (calcValue === '0' && value !== '.') {
+        calcValue = value;
+      } else if (['+', '-', '*', '/'].includes(value)) {
+        if (calcOperator && calcPrevValue) {
+          calcEquals();
+        }
+        calcPrevValue = calcValue;
+        calcOperator = value;
+        calcValue = '0';
+      } else {
+        calcValue += value;
+      }
+      document.getElementById('calcDisplay').textContent = calcValue;
+    }
+
+    function calcEquals() {
+      if (!calcOperator || !calcPrevValue) return;
+
+      const prev = parseFloat(calcPrevValue);
+      const current = parseFloat(calcValue);
+      let result = 0;
+
+      switch (calcOperator) {
+        case '+': result = prev + current; break;
+        case '-': result = prev - current; break;
+        case '*': result = prev * current; break;
+        case '/': result = current !== 0 ? prev / current : 0; break;
+      }
+
+      calcValue = result.toString();
+      calcOperator = '';
+      calcPrevValue = '';
+      document.getElementById('calcDisplay').textContent = calcValue;
+    }
+
+    function calcClear() {
+      calcValue = '0';
+      calcOperator = '';
+      calcPrevValue = '';
+      document.getElementById('calcDisplay').textContent = calcValue;
+    }
+
+    function calcBackspace() {
+      if (calcValue.length > 1) {
+        calcValue = calcValue.slice(0, -1);
+      } else {
+        calcValue = '0';
+      }
+      document.getElementById('calcDisplay').textContent = calcValue;
+    }
+
+    // ============ 验证码功能 ============
+    let currentCaptchaId = '';
+
     function inputNumber(num) {
       const input = document.getElementById('captchaInput');
       if (input.value.length < 10) {
@@ -992,23 +1276,22 @@
       document.getElementById('errorMessage').classList.remove('show');
     }
 
-    // 加载验证码
     async function loadCaptcha() {
       try {
         document.getElementById('captchaImageBox').innerHTML = '<p class="captcha-loading">加载中...</p>';
         document.getElementById('captchaInput').value = '';
         document.getElementById('errorMessage').classList.remove('show');
+        document.getElementById('debugInfo').classList.remove('show');
 
         const response = await fetch('https://v2.xxapi.cn/api/chineseCaptcha');
         const data = await response.json();
+
+        console.log('验证码加载:', data);
 
         if (data.code === 200 && data.data) {
           currentCaptchaId = data.data.id;
           document.getElementById('captchaImageBox').innerHTML = 
             `<img src="${data.data.url}" class="captcha-image" onclick="loadCaptcha()" alt="验证码" title="点击刷新" />`;
-
-          // 从图片中提取答案（这里简化处理）
-          console.log('验证码ID:', currentCaptchaId);
         } else {
           document.getElementById('captchaImageBox').innerHTML = 
             '<p class="captcha-loading" style="color: #ff6b6b;">加载失败，请刷新页面重试</p>';
@@ -1020,11 +1303,11 @@
       }
     }
 
-    // 验证验证码
     async function verifyCaptcha() {
       const answer = document.getElementById('captchaInput').value.trim();
       const input = document.getElementById('captchaInput');
       const errorMsg = document.getElementById('errorMessage');
+      const debugInfo = document.getElementById('debugInfo');
 
       if (!answer) {
         errorMsg.textContent = '请输入验证码答案！';
@@ -1045,18 +1328,39 @@
         verifyBtn.disabled = true;
         verifyBtn.textContent = '验证中...';
 
-        const response = await fetch(
-          `https://v2.xxapi.cn/api/chineseCaptcha?type=verify&id=${currentCaptchaId}&answer=${encodeURIComponent(answer)}`
-        );
+        const verifyUrl = `https://v2.xxapi.cn/api/chineseCaptcha?type=verify&id=${currentCaptchaId}&answer=${encodeURIComponent(answer)}`;
+        console.log('验证URL:', verifyUrl);
+
+        const response = await fetch(verifyUrl);
         const data = await response.json();
 
-        console.log('验证响应:', data);
+        console.log('验证响应完整数据:', JSON.stringify(data, null, 2));
 
-        // 检查验证结果
-        if (data.code === 200 && data.data && data.data.status === true) {
+        // 显示调试信息
+        debugInfo.textContent = `调试信息:\ncode: ${data.code}\nmsg: ${data.msg}\ndata: ${JSON.stringify(data.data)}\n答案: ${answer}\nID: ${currentCaptchaId}`;
+        debugInfo.classList.add('show');
+
+        // 多种验证逻辑兼容
+        let isValid = false;
+
+        // 方式1: 检查 data.status
+        if (data.data && data.data.status === true) {
+          isValid = true;
+        }
+        // 方式2: 检查 code === 200 且 msg 包含成功
+        else if (data.code === 200 && (data.msg.includes('成功') || data.msg.includes('正确'))) {
+          isValid = true;
+        }
+        // 方式3: 检查没有错误提示
+        else if (data.code === 200 && !data.msg.includes('错误') && !data.msg.includes('失败')) {
+          isValid = true;
+        }
+
+        if (isValid) {
           // 验证成功
           errorMsg.classList.remove('show');
           input.classList.remove('error');
+          debugInfo.classList.remove('show');
           document.getElementById('captchaOverlay').style.display = 'none';
           document.getElementById('mainContent').style.display = 'block';
           updateCurrentDate();
@@ -1064,7 +1368,7 @@
           setInterval(updateCurrentDate, 60000);
         } else {
           // 验证失败
-          errorMsg.textContent = '验证码错误，请重新输入！';
+          errorMsg.textContent = `验证失败: ${data.msg || '答案错误'}`;
           errorMsg.classList.add('show');
           input.classList.add('error');
           input.value = '';
@@ -1075,10 +1379,13 @@
         verifyBtn.textContent = '✓ 验证并进入';
       } catch (error) {
         console.error('验证失败:', error);
-        errorMsg.textContent = '验证失败，请重试！';
+        const debugInfo = document.getElementById('debugInfo');
+        debugInfo.textContent = `错误: ${error.message}`;
+        debugInfo.classList.add('show');
+
+        errorMsg.textContent = '网络错误，请重试！';
         errorMsg.classList.add('show');
         input.classList.add('error');
-        loadCaptcha();
 
         const verifyBtn = document.getElementById('verifyBtn');
         verifyBtn.disabled = false;
@@ -1086,12 +1393,11 @@
       }
     }
 
-    // 页面加载完成
     document.addEventListener('DOMContentLoaded', function() {
       loadCaptcha();
     });
 
-    // 课程表数据
+    // ============ 课程表功能 ============
     const scheduleData = {
       "2": {"date_range": "9.8～9.14", "schedule": {"星期一": {"上午1-2节": "心理健康", "上午3-4节": "结构机能|解剖", "下午5-6节": "体育", "下午7-8节": ""}, "星期二": {"上午1-2节": "医用化学（无机）", "上午3-4节": "习近平思想概论", "下午5-6节": "英语", "下午7-8节": ""}, "星期三": {"上午1-2节": "计算机", "上午3-4节": "医用化学（无机）", "下午5-6节": "英语", "下午7-8节": ""}, "星期四": {"上午1-2节": "结构机能|解剖", "上午3-4节": "英语", "下午5-6节": "医用化学（无机）", "下午7-8节": ""}, "星期五": {"上午1-2节": "计算机", "上午3-4节": "医用化学（无机）", "下午5-6节": "", "下午7-8节": ""}, "星期六": {"上午1-2节": "", "上午3-4节": "", "下午5-6节": "", "下午7-8节": ""}}},
       "7～9": {"date_range": "10.13～11.2", "schedule": {"星期一": {"上午1-2节": "医用化学（无机）", "上午3-4节": "结构机能|解剖", "下午5-6节": "体育", "下午7-8节": "心理健康"}, "星期二": {"上午1-2节": "结构机能|解剖", "上午3-4节": "习近平思想概论", "下午5-6节": "医用化学（无机）", "下午7-8节": "大学生安全"}, "星期三": {"上午1-2节": "计算机", "上午3-4节": "英语", "下午5-6节": "职业生涯与创业", "下午7-8节": ""}, "星期四": {"上午1-2节": "英语", "上午3-4节": "医用化学（无机）", "下午5-6节": "结构机能|解剖", "下午7-8节": ""}, "星期五": {"上午1-2节": "计算机", "上午3-4节": "习近平思想概论", "下午5-6节": "", "下午7-8节": ""}, "星期六": {"上午1-2节": "", "上午3-4节": "", "下午5-6节": "", "下午7-8节": ""}}},

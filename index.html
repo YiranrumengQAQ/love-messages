@@ -27,7 +27,24 @@
       50% { background-position: 100% 50%; }
     }
 
-    /* 侧边栏计算器 */
+    /* 验证码遮罩层 */
+    #captchaOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(168, 230, 207, 0.98);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(10px);
+      overflow-y: auto;
+      padding: 20px 0;
+    }
+
+    /* 侧边栏计算器 - 只在验证码界面显示 */
     .calculator-toggle {
       position: fixed;
       right: 0;
@@ -60,7 +77,7 @@
       background: white;
       box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
       transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 9999;
+      z-index: 10001;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -187,23 +204,6 @@
       background: linear-gradient(135deg, #4a7c68, #3a6c58);
     }
 
-    /* 验证码遮罩层 */
-    #captchaOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(168, 230, 207, 0.98);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      backdrop-filter: blur(10px);
-      overflow-y: auto;
-      padding: 20px 0;
-    }
-
     .captcha-container {
       background: white;
       padding: 30px;
@@ -213,6 +213,8 @@
       width: 90%;
       animation: slideUp 0.5s ease;
       margin: auto;
+      position: relative;
+      z-index: 10002;
     }
 
     @keyframes slideUp {
@@ -915,7 +917,7 @@
         background: white;
         padding: 0;
       }
-      .control-panel, .stats-grid, .btn-group, .notice-banner, .exam-banner, .calculator-toggle, .calculator-sidebar {
+      .control-panel, .stats-grid, .btn-group, .notice-banner, .exam-banner {
         display: none;
       }
       .glass-card {
@@ -960,48 +962,48 @@
   </style>
 </head>
 <body>
-  <!-- 计算器按钮 -->
-  <div class="calculator-toggle" onclick="toggleCalculator()">
-    🧮 计算器
-  </div>
-
-  <!-- 侧边栏计算器 -->
-  <div class="calculator-sidebar" id="calculatorSidebar">
-    <div class="calc-header">
-      <h3>🧮 计算器</h3>
-      <button class="calc-close" onclick="toggleCalculator()">✕</button>
-    </div>
-    <div class="calc-body">
-      <div class="calc-display" id="calcDisplay">0</div>
-      <div class="calc-buttons">
-        <button class="calc-btn clear" onclick="calcClear()">C</button>
-        <button class="calc-btn operator" onclick="calcInput('/')">/</button>
-        <button class="calc-btn operator" onclick="calcInput('*')">×</button>
-        <button class="calc-btn operator" onclick="calcBackspace()">⌫</button>
-
-        <button class="calc-btn" onclick="calcInput('7')">7</button>
-        <button class="calc-btn" onclick="calcInput('8')">8</button>
-        <button class="calc-btn" onclick="calcInput('9')">9</button>
-        <button class="calc-btn operator" onclick="calcInput('-')">-</button>
-
-        <button class="calc-btn" onclick="calcInput('4')">4</button>
-        <button class="calc-btn" onclick="calcInput('5')">5</button>
-        <button class="calc-btn" onclick="calcInput('6')">6</button>
-        <button class="calc-btn operator" onclick="calcInput('+')">+</button>
-
-        <button class="calc-btn" onclick="calcInput('1')">1</button>
-        <button class="calc-btn" onclick="calcInput('2')">2</button>
-        <button class="calc-btn" onclick="calcInput('3')">3</button>
-        <button class="calc-btn" onclick="calcInput('0')">0</button>
-
-        <button class="calc-btn equals" onclick="calcEquals()">=</button>
-        <button class="calc-btn" onclick="calcInput('.')">.</button>
-      </div>
-    </div>
-  </div>
-
   <!-- 验证码遮罩层 -->
   <div id="captchaOverlay">
+    <!-- 计算器按钮 - 只在验证码界面显示 -->
+    <div class="calculator-toggle" onclick="toggleCalculator()">
+      🧮 计算器
+    </div>
+
+    <!-- 侧边栏计算器 - 只在验证码界面显示 -->
+    <div class="calculator-sidebar" id="calculatorSidebar">
+      <div class="calc-header">
+        <h3>🧮 计算器</h3>
+        <button class="calc-close" onclick="toggleCalculator()">✕</button>
+      </div>
+      <div class="calc-body">
+        <div class="calc-display" id="calcDisplay">0</div>
+        <div class="calc-buttons">
+          <button class="calc-btn clear" onclick="calcClear()">C</button>
+          <button class="calc-btn operator" onclick="calcInput('/')">/</button>
+          <button class="calc-btn operator" onclick="calcInput('*')">×</button>
+          <button class="calc-btn operator" onclick="calcBackspace()">⌫</button>
+
+          <button class="calc-btn" onclick="calcInput('7')">7</button>
+          <button class="calc-btn" onclick="calcInput('8')">8</button>
+          <button class="calc-btn" onclick="calcInput('9')">9</button>
+          <button class="calc-btn operator" onclick="calcInput('-')">-</button>
+
+          <button class="calc-btn" onclick="calcInput('4')">4</button>
+          <button class="calc-btn" onclick="calcInput('5')">5</button>
+          <button class="calc-btn" onclick="calcInput('6')">6</button>
+          <button class="calc-btn operator" onclick="calcInput('+')">+</button>
+
+          <button class="calc-btn" onclick="calcInput('1')">1</button>
+          <button class="calc-btn" onclick="calcInput('2')">2</button>
+          <button class="calc-btn" onclick="calcInput('3')">3</button>
+          <button class="calc-btn" onclick="calcInput('0')">0</button>
+
+          <button class="calc-btn equals" onclick="calcEquals()">=</button>
+          <button class="calc-btn" onclick="calcInput('.')">.</button>
+        </div>
+      </div>
+    </div>
+
     <div class="captcha-container">
       <h2 class="captcha-title">🔐 验证码验证</h2>
       <p class="captcha-subtitle">请输入下方图片中的计算结果</p>

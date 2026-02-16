@@ -3,385 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloudflare IP Monitor</title>
+    <title>Vue 3 稳健时钟</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/dayjs@1/dayjs.min.js"></script>
+    
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-cf: #f48120;
-            --accent-ipv4: #38bdf8;
-            --accent-ipv6: #a78bfa;
-            --success: #22c55e;
+            --bg-color: #2c3e50;
+            --clock-face: #ecf0f1;
+            --hour-hand: #2c3e50;
+            --minute-hand: #7f8c8d;
+            --second-hand: #e74c3c;
+            --marker-color: #bdc3c7;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
 
         body {
-            background: var(--bg-gradient);
-            color: var(--text-primary);
-            min-height: 100vh;
+            margin: 0;
+            height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 2rem 1rem;
+            background-color: var(--bg-color);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
         }
 
-        /* 动态背景光晕 */
-        .glow {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(244, 129, 32, 0.15) 0%, transparent 70%);
-            top: -200px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        header {
+        #app {
             text-align: center;
-            margin-bottom: 3rem;
-            animation: fadeInDown 0.8s ease-out;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
-        }
-
-        h1 span { color: var(--accent-cf); }
-
-        p.subtitle { color: var(--text-secondary); font-size: 0.95rem; }
-
-        /* 主容器布局 */
-        .container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            width: 100%;
-            max-width: 1000px;
-        }
-
-        /* 卡片样式 */
-        .card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            height: 600px; /* 固定高度，内部滚动 */
+        /* 表盘外壳 */
+        .clock {
+            width: 300px;
+            height: 300px;
+            background-color: var(--clock-face);
+            border-radius: 50%;
+            border: 10px solid #fff;
             position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            border-color: rgba(255,255,255,0.2);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .dot-v4 { background: var(--accent-ipv4); box-shadow: 0 0 10px var(--accent-ipv4); }
-        .dot-v6 { background: var(--accent-ipv6); box-shadow: 0 0 10px var(--accent-ipv6); }
-
-        .action-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: var(--text-primary);
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.2s;
-        }
-        .action-btn:hover { background: rgba(255,255,255,0.2); }
-        .action-btn:active { transform: scale(0.95); }
-
-        /* IP 列表区域 */
-        .ip-list {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        /* 自定义滚动条 */
-        .ip-list::-webkit-scrollbar { width: 6px; }
-        .ip-list::-webkit-scrollbar-track { background: transparent; }
-        .ip-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
-
-        .ip-item {
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            background: rgba(0,0,0,0.2);
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid transparent;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ip-item:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.2);
-            padding-left: 16px;
-        }
-
-        .ip-item::after {
-            content: 'COPY';
+        /* 中心点 */
+        .clock::after {
+            content: '';
             position: absolute;
-            right: 12px;
-            font-size: 0.7rem;
-            opacity: 0;
-            transform: translateX(10px);
-            transition: all 0.2s;
-            font-weight: bold;
-            color: var(--accent-cf);
-        }
-
-        .ip-item:hover::after { opacity: 1; transform: translateX(0); }
-
-        /* 加载状态 */
-        .loading-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding-top: 20px;
-        }
-        .skeleton {
-            height: 40px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            animation: pulse 1.5s infinite;
-        }
-
-        /* Toast 提示 */
-        .toast {
-            position: fixed;
-            bottom: 30px;
+            width: 12px;
+            height: 12px;
+            background: var(--second-hand);
+            border-radius: 50%;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid var(--success);
-            color: var(--success);
-            padding: 12px 24px;
-            border-radius: 50px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 100;
-            backdrop-filter: blur(5px);
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-        @keyframes pulse {
-            0% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-            100% { opacity: 0.3; }
+            transform: translate(-50%, -50%);
+            z-index: 10;
         }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* 指针通用样式 */
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center; /* 关键：设置旋转中心在底部 */
+            border-radius: 4px 4px 0 0;
+            transition: transform 0.05s cubic-bezier(0.4, 2.3, 0.3, 1); /* 增加一点弹性动画 */
         }
 
-        .error-msg {
-            color: #ef4444;
-            font-size: 0.9rem;
-            text-align: center;
-            margin-top: 20px;
-            background: rgba(239, 68, 68, 0.1);
-            padding: 10px;
-            border-radius: 8px;
+        /* 时针 */
+        .hour {
+            width: 8px;
+            height: 70px;
+            background: var(--hour-hand);
+            margin-left: -4px; /* 居中校正 */
+            z-index: 2;
+        }
+
+        /* 分针 */
+        .minute {
+            width: 6px;
+            height: 100px;
+            background: var(--minute-hand);
+            margin-left: -3px;
+            z-index: 3;
+        }
+
+        /* 秒针 */
+        .second {
+            width: 2px;
+            height: 120px;
+            background: var(--second-hand);
+            margin-left: -1px;
+            z-index: 4;
+        }
+
+        /* 刻度 (通过 JS 生成，减少 HTML 冗余) */
+        .marker {
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: var(--marker-color);
+            left: 50%;
+            top: 10px;
+            transform-origin: 50% 140px; /* 140px = 半径(150) - top(10) */
+            margin-left: -1px;
+        }
+        
+        /* 突出 3, 6, 9, 12 点 */
+        .marker.big {
+            width: 4px;
+            height: 15px;
+            background: #95a5a6;
+            margin-left: -2px;
+        }
+
+        /* 数字时间显示 */
+        .digital-time {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            font-variant-numeric: tabular-nums; /* 防止数字跳动 */
+        }
+        
+        .date-display {
+            color: #bdc3c7;
+            margin-top: 5px;
+            font-size: 1rem;
         }
     </style>
 </head>
 <body>
 
-    <div class="glow"></div>
+<div id="app">
+    <div class="clock">
+        <div 
+            v-for="n in 12" 
+            :key="n" 
+            class="marker" 
+            :class="{ big: n % 3 === 0 }"
+            :style="{ transform: `rotate(${n * 30}deg)` }"
+        ></div>
 
-    <header>
-        <h1>Cloudflare <span>IP</span> Monitor</h1>
-        <p class="subtitle">实时获取 Cloudflare-CN 官方公布 IP 段</p>
-        <p style="font-size: 0.8rem; color: #64748b; margin-top: 5px;">Data Source: cloudflare-cn.com</p>
-    </header>
-
-    <div class="container">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <span class="dot dot-v4"></span> IPv4 Ranges
-                </div>
-                <button class="action-btn" onclick="copyAll('v4-list')">Copy All</button>
-            </div>
-            <div id="v4-list" class="ip-list">
-                <div class="loading-container">
-                    <div class="skeleton" style="width: 100%"></div>
-                    <div class="skeleton" style="width: 90%"></div>
-                    <div class="skeleton" style="width: 95%"></div>
-                    <div class="skeleton" style="width: 85%"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <span class="dot dot-v6"></span> IPv6 Ranges
-                </div>
-                <button class="action-btn" onclick="copyAll('v6-list')">Copy All</button>
-            </div>
-            <div id="v6-list" class="ip-list">
-                <div class="loading-container">
-                    <div class="skeleton" style="width: 100%"></div>
-                    <div class="skeleton" style="width: 90%"></div>
-                    <div class="skeleton" style="width: 95%"></div>
-                    <div class="skeleton" style="width: 85%"></div>
-                </div>
-            </div>
-        </div>
+        <div class="hand hour" :style="{ transform: `rotate(${hourDegree}deg)` }"></div>
+        <div class="hand minute" :style="{ transform: `rotate(${minuteDegree}deg)` }"></div>
+        <div class="hand second" :style="{ transform: `rotate(${secondDegree}deg)` }"></div>
     </div>
 
-    <div id="toast" class="toast">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        <span id="toast-msg">Copied successfully!</span>
-    </div>
+    <div class="digital-time">{{ formattedTime }}</div>
+    <div class="date-display">{{ formattedDate }}</div>
+</div>
 
-    <script>
-        // 配置
-        const sources = {
-            v4: 'https://www.cloudflare-cn.com/ips-v4/',
-            v6: 'https://www.cloudflare-cn.com/ips-v6/'
-        };
+<script>
+    const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
 
-        // 使用 AllOrigins 作为 CORS 代理，解决 GitHub Pages 跨域问题
-        // 如果失效，可以替换为 'https://cors-anywhere.herokuapp.com/' (可能需要申请)
-        const corsProxy = 'https://api.allorigins.win/raw?url=';
+    createApp({
+        setup() {
+            // 使用 ref 存储当前时间对象
+            const currentTime = ref(dayjs());
+            let timer = null;
 
-        // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchIPs(sources.v4, 'v4-list');
-            fetchIPs(sources.v6, 'v6-list');
-        });
+            // 核心逻辑：更新时间
+            const updateTime = () => {
+                currentTime.value = dayjs();
+            };
 
-        async function fetchIPs(url, elementId) {
-            const container = document.getElementById(elementId);
-            
-            try {
-                // 通过代理请求
-                const response = await fetch(corsProxy + encodeURIComponent(url));
-                
-                if (!response.ok) throw new Error('Network response was not ok');
-                
-                const text = await response.text();
-                const ips = text.trim().split(/\s+/); // 按空白字符分割
-
-                // 清空 Loading 骨架
-                container.innerHTML = '';
-
-                // 渲染列表
-                ips.forEach(ip => {
-                    if(!ip) return;
-                    const div = document.createElement('div');
-                    div.className = 'ip-item';
-                    div.textContent = ip;
-                    div.onclick = () => copyText(ip, `IP ${ip} Copied!`);
-                    container.appendChild(div);
-                });
-
-            } catch (error) {
-                console.error('Fetch error:', error);
-                container.innerHTML = `
-                    <div class="error-msg">
-                        获取失败<br>
-                        <span style="font-size:0.8em; opacity:0.8">请检查网络或 CORS 代理状态</span>
-                    </div>
-                `;
-            }
-        }
-
-        // 复制单个文本
-        function copyText(text, msg) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast(msg || 'Copied!');
-            }).catch(err => {
-                // 降级处理
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand("Copy");
-                textArea.remove();
-                showToast(msg || 'Copied!');
-            });
-        }
-
-        // 复制全部
-        function copyAll(containerId) {
-            const container = document.getElementById(containerId);
-            const items = container.querySelectorAll('.ip-item');
-            
-            if (items.length === 0) return;
-
-            let allText = '';
-            items.forEach(item => {
-                allText += item.textContent + '\n';
+            // 生命周期：挂载时启动定时器
+            onMounted(() => {
+                // 每秒刷新一次 (如果需要秒针更平滑，可以使用 requestAnimationFrame)
+                timer = setInterval(updateTime, 1000);
             });
 
-            copyText(allText.trim(), 'All IPs Copied!');
-        }
+            // 生命周期：卸载时清除定时器 (防止内存泄漏 Bug)
+            onUnmounted(() => {
+                if (timer) clearInterval(timer);
+            });
 
-        // 显示 Toast 提示
-        let toastTimeout;
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const msgSpan = document.getElementById('toast-msg');
-            
-            msgSpan.textContent = message;
-            toast.classList.add('show');
+            // --- 计算属性 (逻辑层) ---
 
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
+            // 秒针角度：每秒走 6 度 (360 / 60)
+            const secondDegree = computed(() => {
+                return currentTime.value.second() * 6;
+            });
+
+            // 分针角度：每分走 6 度 + 秒针带来的偏移 (让分针平滑移动，而不是一分钟跳一次)
+            const minuteDegree = computed(() => {
+                const minutes = currentTime.value.minute();
+                const seconds = currentTime.value.second();
+                return (minutes * 6) + (seconds * 0.1); 
+            });
+
+            // 时针角度：每小时走 30 度 (360 / 12) + 分针带来的偏移
+            const hourDegree = computed(() => {
+                const hours = currentTime.value.hour();
+                const minutes = currentTime.value.minute();
+                return (hours % 12 * 30) + (minutes * 0.5);
+            });
+
+            // 格式化输出 (利用 Day.js 避免手动拼字符串的 Bug)
+            const formattedTime = computed(() => currentTime.value.format('HH:mm:ss'));
+            const formattedDate = computed(() => currentTime.value.format('YYYY年MM月DD日 dddd'));
+
+            return {
+                hourDegree,
+                minuteDegree,
+                secondDegree,
+                formattedTime,
+                formattedDate
+            };
         }
-    </script>
+    }).mount('#app');
+</script>
+
 </body>
 </html>

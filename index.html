@@ -3,213 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vue 3 稳健时钟</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://unpkg.com/dayjs@1/dayjs.min.js"></script>
-    
+    <title>WebRTC 穿透传输 (LocalSend 网页版原理)</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        :root {
-            --bg-color: #2c3e50;
-            --clock-face: #ecf0f1;
-            --hour-hand: #2c3e50;
-            --minute-hand: #7f8c8d;
-            --second-hand: #e74c3c;
-            --marker-color: #bdc3c7;
-        }
-
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: var(--bg-color);
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-        }
-
-        #app {
-            text-align: center;
-        }
-
-        /* 表盘外壳 */
-        .clock {
-            width: 300px;
-            height: 300px;
-            background-color: var(--clock-face);
-            border-radius: 50%;
-            border: 10px solid #fff;
-            position: relative;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-        }
-
-        /* 中心点 */
-        .clock::after {
-            content: '';
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: var(--second-hand);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-        }
-
-        /* 指针通用样式 */
-        .hand {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom center; /* 关键：设置旋转中心在底部 */
-            border-radius: 4px 4px 0 0;
-            transition: transform 0.05s cubic-bezier(0.4, 2.3, 0.3, 1); /* 增加一点弹性动画 */
-        }
-
-        /* 时针 */
-        .hour {
-            width: 8px;
-            height: 70px;
-            background: var(--hour-hand);
-            margin-left: -4px; /* 居中校正 */
-            z-index: 2;
-        }
-
-        /* 分针 */
-        .minute {
-            width: 6px;
-            height: 100px;
-            background: var(--minute-hand);
-            margin-left: -3px;
-            z-index: 3;
-        }
-
-        /* 秒针 */
-        .second {
-            width: 2px;
-            height: 120px;
-            background: var(--second-hand);
-            margin-left: -1px;
-            z-index: 4;
-        }
-
-        /* 刻度 (通过 JS 生成，减少 HTML 冗余) */
-        .marker {
-            position: absolute;
-            width: 2px;
-            height: 10px;
-            background: var(--marker-color);
-            left: 50%;
-            top: 10px;
-            transform-origin: 50% 140px; /* 140px = 半径(150) - top(10) */
-            margin-left: -1px;
-        }
+        :root { --primary: #007bff; --bg: #f4f7f6; --card: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: var(--primary); margin-top: 0; }
+        .status-box { text-align: center; padding: 15px; margin-bottom: 20px; border-radius: 8px; background: #e9ecef; }
+        .my-id { font-size: 24px; font-weight: bold; color: var(--primary); letter-spacing: 1px; margin: 10px 0; word-break: break-all; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; transition: 0.3s; }
+        input[type="text"]:focus { border-color: var(--primary); }
+        button { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { opacity: 0.9; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
         
-        /* 突出 3, 6, 9, 12 点 */
-        .marker.big {
-            width: 4px;
-            height: 15px;
-            background: #95a5a6;
-            margin-left: -2px;
-        }
+        .chat-area { border: 1px solid #eee; height: 200px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 15px; background: #fafafa; font-size: 14px; }
+        .log-item { margin-bottom: 5px; padding: 5px; border-radius: 4px; }
+        .log-sys { color: #888; font-style: italic; font-size: 12px; }
+        .log-in { background: #e3f2fd; color: #0d47a1; }
+        .log-out { background: #e8f5e9; color: #1b5e20; text-align: right; }
 
-        /* 数字时间显示 */
-        .digital-time {
-            color: #fff;
-            font-size: 2rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-            font-variant-numeric: tabular-nums; /* 防止数字跳动 */
-        }
+        .file-controls { border-top: 1px solid #eee; padding-top: 20px; display: none; }
+        .file-label { display: block; margin-bottom: 10px; font-weight: bold; }
         
-        .date-display {
-            color: #bdc3c7;
-            margin-top: 5px;
-            font-size: 1rem;
-        }
+        /* 动画提示 */
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        .connecting { animation: pulse 1.5s infinite; color: orange; }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <div class="clock">
-        <div 
-            v-for="n in 12" 
-            :key="n" 
-            class="marker" 
-            :class="{ big: n % 3 === 0 }"
-            :style="{ transform: `rotate(${n * 30}deg)` }"
-        ></div>
-
-        <div class="hand hour" :style="{ transform: `rotate(${hourDegree}deg)` }"></div>
-        <div class="hand minute" :style="{ transform: `rotate(${minuteDegree}deg)` }"></div>
-        <div class="hand second" :style="{ transform: `rotate(${secondDegree}deg)` }"></div>
+<div class="container">
+    <h2>🚀 WebRTC 远程/局域网快传</h2>
+    
+    <div class="status-box">
+        <div>我的连接 ID (分享给对方):</div>
+        <div class="my-id" id="myId">正在连接公共服务器...</div>
+        <div style="font-size: 12px; color: #666;">状态: <span id="statusText">初始化中...</span></div>
     </div>
 
-    <div class="digital-time">{{ formattedTime }}</div>
-    <div class="date-display">{{ formattedDate }}</div>
+    <div class="input-group" id="connectBox">
+        <input type="text" id="targetId" placeholder="输入对方的 ID">
+        <button onclick="connectToPeer()">连接对方</button>
+    </div>
+
+    <div class="file-controls" id="transferArea">
+        <div class="chat-area" id="logs"></div>
+        
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="file" id="fileInput" style="flex: 1;">
+            <button onclick="sendFile()">发送文件</button>
+        </div>
+        <p style="font-size: 12px; color: #999; margin-top: 5px;">*文件直连传输，不经过服务器，大小无限制。</p>
+    </div>
 </div>
 
 <script>
-    const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
+    let peer;
+    let conn;
+    
+    // 初始化 PeerJS (使用官方免费的公共信令服务器)
+    // 这里的 config 包含了 Google 的免费 STUN 服务器，用于穿透 NAT
+    function init() {
+        // 创建一个随机 ID，也可以在 new Peer('自定义ID') 指定
+        peer = new Peer(null, {
+            debug: 2,
+            config: {
+                'iceServers': [
+                    { url: 'stun:stun.l.google.com:19302' },
+                    { url: 'stun:stun1.l.google.com:19302' }
+                ]
+            }
+        });
 
-    createApp({
-        setup() {
-            // 使用 ref 存储当前时间对象
-            const currentTime = ref(dayjs());
-            let timer = null;
+        // 1. 成功连接到信令服务器，拿到自己的 ID
+        peer.on('open', (id) => {
+            document.getElementById('myId').innerText = id;
+            updateStatus('✅ 在线 (公共服务器)', 'green');
+        });
 
-            // 核心逻辑：更新时间
-            const updateTime = () => {
-                currentTime.value = dayjs();
-            };
+        // 2. 被动接收连接 (当别人连接我时)
+        peer.on('connection', (connection) => {
+            handleConnection(connection);
+        });
 
-            // 生命周期：挂载时启动定时器
-            onMounted(() => {
-                // 每秒刷新一次 (如果需要秒针更平滑，可以使用 requestAnimationFrame)
-                timer = setInterval(updateTime, 1000);
-            });
+        peer.on('error', (err) => {
+            updateStatus('❌ 错误: ' + err.type, 'red');
+            console.error(err);
+        });
+        
+        peer.on('disconnected', () => {
+            updateStatus('⚠️ 与服务器断开', 'orange');
+            // 可以尝试 peer.reconnect()
+        });
+    }
 
-            // 生命周期：卸载时清除定时器 (防止内存泄漏 Bug)
-            onUnmounted(() => {
-                if (timer) clearInterval(timer);
-            });
+    // 主动发起连接
+    function connectToPeer() {
+        const targetId = document.getElementById('targetId').value.trim();
+        if (!targetId) return alert('请输入对方 ID');
+        
+        updateStatus('🔄 正在穿透连接...', 'orange');
+        const connection = peer.connect(targetId, {
+            reliable: true // 启用可靠传输模式
+        });
+        handleConnection(connection);
+    }
 
-            // --- 计算属性 (逻辑层) ---
+    // 处理连接逻辑 (无论是主动还是被动)
+    function handleConnection(connection) {
+        conn = connection;
 
-            // 秒针角度：每秒走 6 度 (360 / 60)
-            const secondDegree = computed(() => {
-                return currentTime.value.second() * 6;
-            });
+        conn.on('open', () => {
+            updateStatus('🚀 P2P 通道已建立!', 'green');
+            document.getElementById('connectBox').style.display = 'none'; // 隐藏连接框
+            document.getElementById('transferArea').style.display = 'block'; // 显示传输区
+            addLog('sys', '双方已连接，可以开始发送文件。');
+        });
 
-            // 分针角度：每分走 6 度 + 秒针带来的偏移 (让分针平滑移动，而不是一分钟跳一次)
-            const minuteDegree = computed(() => {
-                const minutes = currentTime.value.minute();
-                const seconds = currentTime.value.second();
-                return (minutes * 6) + (seconds * 0.1); 
-            });
+        // 接收数据
+        conn.on('data', (data) => {
+            if (data.type === 'file') {
+                // 接收到文件
+                addLog('in', `收到文件: ${data.fileName} (${formatSize(data.fileSize)})`);
+                receiveFile(data);
+            } else if (data.type === 'msg') {
+                // 接收到文字消息
+                addLog('in', data.content);
+            }
+        });
 
-            // 时针角度：每小时走 30 度 (360 / 12) + 分针带来的偏移
-            const hourDegree = computed(() => {
-                const hours = currentTime.value.hour();
-                const minutes = currentTime.value.minute();
-                return (hours % 12 * 30) + (minutes * 0.5);
-            });
+        conn.on('close', () => {
+            updateStatus('🚫 连接已断开', 'red');
+            document.getElementById('connectBox').style.display = 'flex';
+            document.getElementById('transferArea').style.display = 'none';
+        });
+    }
 
-            // 格式化输出 (利用 Day.js 避免手动拼字符串的 Bug)
-            const formattedTime = computed(() => currentTime.value.format('HH:mm:ss'));
-            const formattedDate = computed(() => currentTime.value.format('YYYY年MM月DD日 dddd'));
+    // 发送文件
+    function sendFile() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if (!file) return alert('请选择文件');
 
-            return {
-                hourDegree,
-                minuteDegree,
-                secondDegree,
-                formattedTime,
-                formattedDate
-            };
-        }
-    }).mount('#app');
+        addLog('out', `正在发送: ${file.name}...`);
+
+        // 将文件转换为 Blob 发送
+        // 注意: 大文件在真实生产环境中需要切片(Chunking)，这里为了演示代码简洁，直接发送 Blob
+        // PeerJS 会自动处理二进制分包，但过大的文件(>几百MB)可能会卡顿浏览器
+        const blob = new Blob([file], { type: file.type });
+        
+        conn.send({
+            type: 'file',
+            file: blob,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type
+        });
+        
+        addLog('sys', '文件发送指令已发出');
+    }
+
+    // 处理接收到的文件并触发下载
+    function receiveFile(data) {
+        const blob = new Blob([data.file], { type: data.fileType });
+        const url = URL.createObjectURL(blob);
+        
+        // 创建一个动态下载链接
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = data.fileName;
+        a.textContent = `⬇️ 点击下载: ${data.fileName}`;
+        a.style.display = 'block';
+        a.style.marginTop = '5px';
+        a.style.fontWeight = 'bold';
+        
+        const logDiv = document.getElementById('logs');
+        const item = document.createElement('div');
+        item.className = 'log-item log-in';
+        item.appendChild(a);
+        logDiv.appendChild(item);
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    // 辅助功能
+    function updateStatus(text, color) {
+        const el = document.getElementById('statusText');
+        el.innerText = text;
+        el.style.color = color || 'black';
+    }
+
+    function addLog(type, msg) {
+        const logDiv = document.getElementById('logs');
+        const item = document.createElement('div');
+        item.className = `log-item log-${type}`;
+        item.innerText = msg;
+        logDiv.appendChild(item);
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function formatSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // 启动
+    init();
 </script>
 
 </body>

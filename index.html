@@ -2,219 +2,450 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebRTC 穿透传输 (LocalSend 网页版原理)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>极速快传 | LocalDrop</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #007bff; --bg: #f4f7f6; --card: #ffffff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h2 { text-align: center; color: var(--primary); margin-top: 0; }
-        .status-box { text-align: center; padding: 15px; margin-bottom: 20px; border-radius: 8px; background: #e9ecef; }
-        .my-id { font-size: 24px; font-weight: bold; color: var(--primary); letter-spacing: 1px; margin: 10px 0; word-break: break-all; }
-        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; transition: 0.3s; }
-        input[type="text"]:focus { border-color: var(--primary); }
-        button { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:hover { opacity: 0.9; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        
-        .chat-area { border: 1px solid #eee; height: 200px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 15px; background: #fafafa; font-size: 14px; }
-        .log-item { margin-bottom: 5px; padding: 5px; border-radius: 4px; }
-        .log-sys { color: #888; font-style: italic; font-size: 12px; }
-        .log-in { background: #e3f2fd; color: #0d47a1; }
-        .log-out { background: #e8f5e9; color: #1b5e20; text-align: right; }
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass: rgba(255, 255, 255, 0.95);
+            --text-main: #1f2937;
+            --text-sub: #6b7280;
+            --success: #10b981;
+            --radius: 16px;
+        }
 
-        .file-controls { border-top: 1px solid #eee; padding-top: 20px; display: none; }
-        .file-label { display: block; margin-bottom: 10px; font-weight: bold; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-gradient); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; color: var(--text-main); }
+
+        /* 响应式容器 */
+        .app-container {
+            width: 100%;
+            max-width: 480px; /* 手机优先设计 */
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部状态栏 */
+        header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .status-dot {
+            height: 10px; width: 10px; background-color: #fbbf24; border-radius: 50%;
+            display: inline-block; margin-right: 6px; box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+            transition: background-color 0.3s;
+        }
+        .status-dot.connected { background-color: var(--success); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+        h1 { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
+        .status-text { font-size: 0.8rem; color: var(--text-sub); margin-top: 4px; }
+
+        /* 主内容区 */
+        main { padding: 24px; }
+
+        /* 卡片通用样式 */
+        .card {
+            background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 16px;
+            text-align: center; transition: transform 0.2s;
+        }
         
-        /* 动画提示 */
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-        .connecting { animation: pulse 1.5s infinite; color: orange; }
+        /* ID 显示区 */
+        .my-id-box {
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            margin: 15px 0;
+        }
+        .digit-box {
+            font-size: 2rem; font-weight: 700; letter-spacing: 4px; color: var(--primary);
+            font-family: 'Courier New', monospace;
+        }
+        .copy-btn {
+            background: none; border: none; cursor: pointer; color: var(--text-sub);
+            padding: 8px; border-radius: 8px; transition: background 0.2s;
+        }
+        .copy-btn:hover { background: #e5e7eb; color: var(--primary); }
+
+        /* 连接输入区 */
+        .connect-group { display: flex; gap: 8px; margin-top: 10px; }
+        input.code-input {
+            flex: 1; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px;
+            font-size: 1.1rem; text-align: center; outline: none; transition: border-color 0.2s;
+        }
+        input.code-input:focus { border-color: var(--primary); }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; font-size: 1rem;
+        }
+        .btn-primary { background: var(--primary); color: white; flex: 1; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(1px); }
+        .btn:disabled { background: #d1d5db; cursor: not-allowed; transform: none; }
+
+        /* 传输区域 (默认隐藏) */
+        #transfer-area { display: none; animation: fadeIn 0.5s; }
+        
+        .file-drop-zone {
+            border: 2px dashed #cbd5e1; border-radius: 12px; padding: 30px 20px;
+            background: #f8fafc; cursor: pointer; transition: all 0.2s;
+        }
+        .file-drop-zone:hover { border-color: var(--primary); background: #eff6ff; }
+        .file-icon { font-size: 32px; margin-bottom: 10px; display: block; }
+        
+        /* 进度条 */
+        .progress-container { margin-top: 15px; display: none; }
+        .progress-bar-bg { background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.1s linear; }
+        .progress-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-sub); margin-top: 5px; }
+
+        /* 消息列表 */
+        .log-list {
+            max-height: 150px; overflow-y: auto; margin-top: 20px; font-size: 0.85rem;
+            background: #fff; border-radius: 8px; padding: 10px; border: 1px solid #f3f4f6;
+        }
+        .log-item { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #f9fafb; display: flex; justify-content: space-between; }
+        .log-item:last-child { border-bottom: none; }
+        .tag { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
+        .tag.sent { background: #e0e7ff; color: #4338ca; }
+        .tag.recv { background: #d1fae5; color: #065f46; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 简单提示框 */
+        #toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px;
+            font-size: 0.9rem; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>🚀 WebRTC 远程/局域网快传</h2>
-    
-    <div class="status-box">
-        <div>我的连接 ID (分享给对方):</div>
-        <div class="my-id" id="myId">正在连接公共服务器...</div>
-        <div style="font-size: 12px; color: #666;">状态: <span id="statusText">初始化中...</span></div>
-    </div>
+<div class="app-container">
+    <header>
+        <div id="status-dot" class="status-dot"></div>
+        <h1>闪电互传</h1>
+        <div id="status-text" class="status-text">正在初始化网络...</div>
+    </header>
 
-    <div class="input-group" id="connectBox">
-        <input type="text" id="targetId" placeholder="输入对方的 ID">
-        <button onclick="connectToPeer()">连接对方</button>
-    </div>
-
-    <div class="file-controls" id="transferArea">
-        <div class="chat-area" id="logs"></div>
-        
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="file" id="fileInput" style="flex: 1;">
-            <button onclick="sendFile()">发送文件</button>
+    <main>
+        <div class="card" id="id-card">
+            <div style="color:var(--text-sub); font-size:0.9rem;">我的数字暗号</div>
+            <div class="my-id-box">
+                <div class="digit-box" id="my-id">...</div>
+                <button class="copy-btn" onclick="copyId()" title="复制">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </button>
+            </div>
+            <div style="font-size:0.75rem; color:#9ca3af;">告诉对方这个数字即可连接</div>
         </div>
-        <p style="font-size: 12px; color: #999; margin-top: 5px;">*文件直连传输，不经过服务器，大小无限制。</p>
-    </div>
+
+        <div class="card" id="connect-card">
+            <div style="text-align:left; font-size:0.9rem; font-weight:600; margin-bottom:8px;">连接对方</div>
+            <div class="connect-group">
+                <input type="tel" id="target-id-input" class="code-input" placeholder="输入6位数字" maxlength="6">
+                <button class="btn btn-primary" onclick="connect()" id="btn-connect">连接</button>
+            </div>
+        </div>
+
+        <div id="transfer-area">
+            <div class="file-drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <span class="file-icon">📁</span>
+                <strong>点击或拖拽文件到这里</strong>
+                <div style="font-size:0.8rem; color:#9ca3af; margin-top:5px;">支持大文件直连传输</div>
+                <input type="file" id="file-input" style="display:none">
+            </div>
+
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-info">
+                    <span id="progress-text">正在发送...</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+            </div>
+
+            <div class="log-list" id="log-list">
+                <div class="log-item" style="justify-content:center; color:#ccc; border:none;">传输记录</div>
+            </div>
+        </div>
+    </main>
 </div>
 
+<div id="toast">已复制</div>
+
 <script>
-    let peer;
-    let conn;
+    // --- 配置与全局变量 ---
+    const ID_PREFIX = 'ls-quick-v1-'; // 用于隔离公共服务器上的其他应用
+    let peer = null;
+    let conn = null;
+    let myShortId = '';
     
-    // 初始化 PeerJS (使用官方免费的公共信令服务器)
-    // 这里的 config 包含了 Google 的免费 STUN 服务器，用于穿透 NAT
+    // --- 核心逻辑 ---
+
     function init() {
-        // 创建一个随机 ID，也可以在 new Peer('自定义ID') 指定
-        peer = new Peer(null, {
-            debug: 2,
+        // 生成随机6位数字ID
+        myShortId = Math.floor(100000 + Math.random() * 900000).toString();
+        document.getElementById('my-id').innerText = myShortId.substring(0,3) + ' ' + myShortId.substring(3);
+
+        peer = new Peer(ID_PREFIX + myShortId, {
+            debug: 1,
             config: {
                 'iceServers': [
-                    { url: 'stun:stun.l.google.com:19302' },
-                    { url: 'stun:stun1.l.google.com:19302' }
+                    { url: 'stun:stun.l.google.com:19302' }, // Google STUN
+                    { url: 'stun:global.stun.twilio.com:3478' } // 备用 STUN
                 ]
             }
         });
 
-        // 1. 成功连接到信令服务器，拿到自己的 ID
         peer.on('open', (id) => {
-            document.getElementById('myId').innerText = id;
-            updateStatus('✅ 在线 (公共服务器)', 'green');
+            updateStatus(true, '设备在线，等待连接');
         });
 
-        // 2. 被动接收连接 (当别人连接我时)
         peer.on('connection', (connection) => {
             handleConnection(connection);
         });
 
         peer.on('error', (err) => {
-            updateStatus('❌ 错误: ' + err.type, 'red');
-            console.error(err);
+            if (err.type === 'unavailable-id') {
+                // 极低概率ID冲突，重新刷新即可
+                alert('ID生成冲突，请刷新页面重试');
+            } else {
+                updateStatus(false, '连接错误: ' + err.type);
+            }
         });
-        
+
         peer.on('disconnected', () => {
-            updateStatus('⚠️ 与服务器断开', 'orange');
-            // 可以尝试 peer.reconnect()
+            updateStatus(false, '与服务器断开，正在重连...');
+            peer.reconnect();
         });
     }
 
-    // 主动发起连接
-    function connectToPeer() {
-        const targetId = document.getElementById('targetId').value.trim();
-        if (!targetId) return alert('请输入对方 ID');
+    // 主动连接
+    function connect() {
+        const inputVal = document.getElementById('target-id-input').value.replace(/\s/g, '');
+        if (inputVal.length !== 6 || isNaN(inputVal)) {
+            showToast('请输入正确的6位数字ID');
+            return;
+        }
         
-        updateStatus('🔄 正在穿透连接...', 'orange');
-        const connection = peer.connect(targetId, {
-            reliable: true // 启用可靠传输模式
+        const btn = document.getElementById('btn-connect');
+        btn.disabled = true;
+        btn.innerText = '连接中...';
+
+        const connection = peer.connect(ID_PREFIX + inputVal, {
+            reliable: true // 开启可靠传输
         });
+        
         handleConnection(connection);
     }
 
-    // 处理连接逻辑 (无论是主动还是被动)
+    // 处理连接建立
     function handleConnection(connection) {
         conn = connection;
 
         conn.on('open', () => {
-            updateStatus('🚀 P2P 通道已建立!', 'green');
-            document.getElementById('connectBox').style.display = 'none'; // 隐藏连接框
-            document.getElementById('transferArea').style.display = 'block'; // 显示传输区
-            addLog('sys', '双方已连接，可以开始发送文件。');
+            // UI 切换
+            document.getElementById('id-card').style.display = 'none';
+            document.getElementById('connect-card').style.display = 'none';
+            document.getElementById('transfer-area').style.display = 'block';
+            updateStatus(true, '已连接到设备');
+            
+            // 发送握手成功
+            addLog('SYS', 'P2P 通道建立成功');
         });
 
-        // 接收数据
         conn.on('data', (data) => {
-            if (data.type === 'file') {
-                // 接收到文件
-                addLog('in', `收到文件: ${data.fileName} (${formatSize(data.fileSize)})`);
-                receiveFile(data);
-            } else if (data.type === 'msg') {
-                // 接收到文字消息
-                addLog('in', data.content);
-            }
+            handleData(data);
         });
 
         conn.on('close', () => {
-            updateStatus('🚫 连接已断开', 'red');
-            document.getElementById('connectBox').style.display = 'flex';
-            document.getElementById('transferArea').style.display = 'none';
+            alert('对方已断开连接');
+            location.reload();
+        });
+        
+        conn.on('error', (err) => {
+            console.error(err);
+            showToast('传输发生错误');
         });
     }
+
+    // --- 文件传输逻辑 (带分片) ---
+    const CHUNK_SIZE = 16 * 1024; // 16KB 分片，保证稳定性
+    let incomingFileInfo = null;
+    let incomingFileBuffer = [];
+    let receivedSize = 0;
 
     // 发送文件
-    function sendFile() {
-        const fileInput = document.getElementById('fileInput');
-        const file = fileInput.files[0];
-        if (!file) return alert('请选择文件');
+    document.getElementById('file-input').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-        addLog('out', `正在发送: ${file.name}...`);
-
-        // 将文件转换为 Blob 发送
-        // 注意: 大文件在真实生产环境中需要切片(Chunking)，这里为了演示代码简洁，直接发送 Blob
-        // PeerJS 会自动处理二进制分包，但过大的文件(>几百MB)可能会卡顿浏览器
-        const blob = new Blob([file], { type: file.type });
-        
+        // 1. 发送元数据
         conn.send({
-            type: 'file',
-            file: blob,
-            fileName: file.name,
-            fileSize: file.size,
-            fileType: file.type
+            type: 'meta',
+            name: file.name,
+            size: file.size,
+            mime: file.type
         });
+
+        // UI 更新
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-percent');
+        progressContainer.style.display = 'block';
+        addLog('OUT', `开始发送: ${file.name}`);
+
+        // 2. 读取并分片发送
+        let offset = 0;
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            conn.send({
+                type: 'chunk',
+                data: e.target.result
+            });
+
+            offset += e.target.result.byteLength;
+            
+            // 更新进度条
+            const percent = Math.round((offset / file.size) * 100);
+            progressBar.style.width = percent + '%';
+            progressText.innerText = percent + '%';
+
+            // 继续读取下一片
+            if (offset < file.size) {
+                readSlice(offset);
+            } else {
+                addLog('OUT', '发送完成');
+                showToast('文件发送成功');
+                setTimeout(() => progressContainer.style.display = 'none', 2000);
+            }
+        };
+
+        const readSlice = (o) => {
+            const slice = file.slice(o, o + CHUNK_SIZE);
+            reader.readAsArrayBuffer(slice);
+        };
+
+        readSlice(0);
+    });
+
+    // 处理接收到的数据
+    function handleData(data) {
+        if (data.type === 'meta') {
+            // 收到文件头信息
+            incomingFileInfo = data;
+            incomingFileBuffer = [];
+            receivedSize = 0;
+            
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('progress-text').innerText = '正在接收 ' + data.name;
+            addLog('IN', `接收中: ${data.name}`);
         
-        addLog('sys', '文件发送指令已发出');
+        } else if (data.type === 'chunk') {
+            // 收到文件块
+            incomingFileBuffer.push(data.data);
+            receivedSize += data.data.byteLength;
+
+            // 更新接收进度
+            if (incomingFileInfo) {
+                const percent = Math.round((receivedSize / incomingFileInfo.size) * 100);
+                document.getElementById('progress-fill').style.width = percent + '%';
+                document.getElementById('progress-percent').innerText = percent + '%';
+
+                // 接收完成
+                if (receivedSize >= incomingFileInfo.size) {
+                    saveFile(incomingFileBuffer, incomingFileInfo);
+                    incomingFileInfo = null;
+                    incomingFileBuffer = [];
+                }
+            }
+        }
     }
 
-    // 处理接收到的文件并触发下载
-    function receiveFile(data) {
-        const blob = new Blob([data.file], { type: data.fileType });
+    function saveFile(buffers, info) {
+        const blob = new Blob(buffers, { type: info.mime });
         const url = URL.createObjectURL(blob);
         
-        // 创建一个动态下载链接
         const a = document.createElement('a');
         a.href = url;
-        a.download = data.fileName;
-        a.textContent = `⬇️ 点击下载: ${data.fileName}`;
-        a.style.display = 'block';
-        a.style.marginTop = '5px';
-        a.style.fontWeight = 'bold';
+        a.download = info.name;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
         
-        const logDiv = document.getElementById('logs');
-        const item = document.createElement('div');
-        item.className = 'log-item log-in';
-        item.appendChild(a);
-        logDiv.appendChild(item);
-        logDiv.scrollTop = logDiv.scrollHeight;
+        addLog('IN', '接收完成，已下载');
+        showToast('文件已保存');
+        setTimeout(() => document.getElementById('progress-container').style.display = 'none', 2000);
     }
 
-    // 辅助功能
-    function updateStatus(text, color) {
-        const el = document.getElementById('statusText');
-        el.innerText = text;
-        el.style.color = color || 'black';
+    // --- 辅助功能 ---
+    function updateStatus(connected, text) {
+        const dot = document.getElementById('status-dot');
+        const txt = document.getElementById('status-text');
+        
+        if (connected) {
+            dot.classList.add('connected');
+            txt.style.color = 'var(--success)';
+        } else {
+            dot.classList.remove('connected');
+            txt.style.color = 'var(--text-sub)';
+        }
+        txt.innerText = text;
     }
 
-    function addLog(type, msg) {
-        const logDiv = document.getElementById('logs');
-        const item = document.createElement('div');
-        item.className = `log-item log-${type}`;
-        item.innerText = msg;
-        logDiv.appendChild(item);
-        logDiv.scrollTop = logDiv.scrollHeight;
+    function addLog(tag, msg) {
+        const list = document.getElementById('log-list');
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        div.innerHTML = `<span style="font-size:0.8rem">${msg}</span> <span class="tag ${tag === 'OUT' ? 'sent' : 'recv'}">${tag}</span>`;
+        list.prepend(div);
     }
 
-    function formatSize(bytes) {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    function copyId() {
+        navigator.clipboard.writeText(myShortId).then(() => showToast('暗号已复制'));
     }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.opacity = '1';
+        t.style.transform = 'translate(-50%, -10px)';
+        setTimeout(() => {
+            t.style.opacity = '0';
+            t.style.transform = 'translate(-50%, 0)';
+        }, 2000);
+    }
+
+    // 拖拽支持
+    const zone = document.getElementById('drop-zone');
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.style.background = '#eff6ff'; });
+    zone.addEventListener('dragleave', (e) => { e.preventDefault(); zone.style.background = '#f8fafc'; });
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.style.background = '#f8fafc';
+        const files = e.dataTransfer.files;
+        if (files.length) document.getElementById('file-input').files = files;
+        // 触发change事件
+        const event = new Event('change');
+        document.getElementById('file-input').dispatchEvent(event);
+    });
 
     // 启动
     init();
-</script>
 
+</script>
 </body>
 </html>

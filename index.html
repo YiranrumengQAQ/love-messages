@@ -3,270 +3,474 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 Flux Timer</title>
+    <title>极速流连 2026 - P2P 安全互传</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --bg: #0a0a0a;
-            --text: #f5f5f5;
-            --accent: #3b82f6;
-            --surface: #171717;
-            --font-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            height: 100vh;
-            margin: 0;
-            display: grid;
-            place-items: center;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #0f172a;
+            color: white;
             overflow: hidden;
-            transition: background 0.3s;
         }
 
-        /* 极简容器 */
-        main {
-            text-align: center;
-            width: 100%;
-            max-width: 600px;
-            padding: 2rem;
+        /* 磨砂玻璃容器 */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* 倒计时显示区 */
-        #display {
-            font-family: var(--font-mono);
-            font-size: clamp(3rem, 15vw, 8rem);
-            font-weight: 200;
-            letter-spacing: -2px;
-            /* 关键：等宽数字，防止秒数变化时抖动 */
-            font-variant-numeric: tabular-nums;
-            line-height: 1;
-            margin-bottom: 2rem;
-            opacity: 0; /* 初始隐藏，加载JS后显示 */
-            transform: translateY(20px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
+        /* 隐藏滚动条 */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-        #display.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        /* 动画 */
+        .fade-enter { opacity: 0; transform: scale(0.95); }
+        .fade-enter-active { opacity: 1; transform: scale(1); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .fade-exit { opacity: 1; transform: scale(1); }
+        .fade-exit-active { opacity: 0; transform: scale(0.95); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* 控制区域 */
-        .controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        /* 现代化的输入框 */
-        .input-group {
-            background: var(--surface);
-            padding: 1rem 1.5rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            transition: transform 0.2s, opacity 0.3s;
-        }
-
-        label {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            white-space: nowrap;
-        }
-
-        input[type="time"] {
-            background: transparent;
-            border: none;
-            color: var(--text);
-            font-size: 1.5rem;
-            font-family: inherit;
-            outline: none;
-            cursor: pointer;
-        }
-
-        input[type="time"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
-        }
-
-        /* 按钮样式 */
-        button {
-            background: var(--text);
-            color: var(--bg);
-            border: none;
-            padding: 1rem 3rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        button.stop-btn {
-            background: rgba(255, 99, 71, 0.2);
-            color: #ff6347;
-            border: 1px solid rgba(255, 99, 71, 0.3);
-        }
-
-        /* 状态切换 */
-        .hidden {
-            display: none !important;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* 消息气泡渐变 */
+        .msg-gradient { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); }
+        
+        /* 加载动画 */
+        .loader { border: 3px solid rgba(255,255,255,0.1); border-left-color: #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
+<body class="h-screen w-screen relative selection:bg-blue-500 selection:text-white">
 
-    <main>
-        <div id="display" class="active">00:00:00</div>
+    <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-        <div id="setup-panel" class="controls">
-            <div class="input-group">
-                <label>设置明天</label>
-                <input type="time" id="target-time" value="08:00">
+    <div id="app" class="relative z-10 w-full h-full flex flex-col items-center justify-center p-4">
+
+        <div id="connect-screen" class="glass-panel w-full max-w-sm p-8 rounded-3xl transition-all duration-500">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-bolt text-2xl text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">极速流连 <span class="text-blue-400">2026</span></h1>
+                <p class="text-slate-400 text-sm mt-2">P2P 加密 • 无服务器中转</p>
             </div>
-            <button onclick="startCountdown()">开始倒计时</button>
+
+            <div class="space-y-6">
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-white/5 flex justify-between items-center group cursor-pointer hover:bg-slate-800 transition" onclick="copyId()">
+                    <div>
+                        <p class="text-xs text-slate-400 mb-1">本机连接码</p>
+                        <p id="my-id" class="text-2xl font-mono font-bold tracking-wider text-white">------</p>
+                    </div>
+                    <i class="fa-regular fa-copy text-slate-500 group-hover:text-blue-400 transition"></i>
+                </div>
+
+                <div class="relative">
+                    <input type="text" id="target-id" maxlength="6" placeholder="输入对方 6 位码" 
+                        class="w-full bg-slate-800/50 text-white text-center text-xl font-mono p-4 rounded-xl border border-white/10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-600">
+                </div>
+
+                <button onclick="connectToPeer()" id="connect-btn" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-95 flex items-center justify-center gap-2">
+                    <span>发起连接</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                
+                <p id="status-msg" class="text-center text-xs text-slate-500 h-4"></p>
+            </div>
         </div>
 
-        <div id="running-panel" class="controls hidden">
-            <div style="opacity: 0.5; margin-bottom: 10px; font-size: 0.9rem;">目标: 明天 <span id="target-display"></span></div>
-            <button class="stop-btn" onclick="resetTimer()">取消</button>
+        <div id="chat-screen" class="hidden w-full h-full max-w-2xl flex-col glass-panel rounded-2xl overflow-hidden shadow-2xl animate-fade">
+            <div class="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-slate-900/30 backdrop-blur-md">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-user text-slate-400"></i>
+                        </div>
+                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-sm">已连接设备</h3>
+                        <p class="text-xs text-green-400">P2P 加密通道活跃</p>
+                    </div>
+                </div>
+                <button onclick="disconnect()" class="w-8 h-8 rounded-full hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition flex items-center justify-center">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+
+            <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide bg-slate-900/20">
+                <div class="text-center py-4">
+                    <span class="text-xs bg-slate-800/50 text-slate-400 px-3 py-1 rounded-full">通道已建立，您可以发送文字、图片或视频</span>
+                </div>
+            </div>
+
+            <div id="progress-bar-container" class="hidden px-4 py-2 bg-slate-800/90 border-t border-white/5">
+                <div class="flex justify-between text-xs text-slate-300 mb-1">
+                    <span id="progress-text">正在发送文件...</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="w-full bg-slate-700 rounded-full h-1.5">
+                    <div id="progress-fill" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-900/40 border-t border-white/5">
+                <div id="preview-area" class="hidden mb-3 relative inline-block">
+                    <img id="img-preview" class="h-20 rounded-lg border border-white/10 shadow-lg object-cover">
+                    <div id="file-info-preview" class="hidden h-20 px-4 bg-slate-800 rounded-lg border border-white/10 flex items-center gap-3">
+                        <i class="fa-solid fa-file text-blue-400 text-xl"></i>
+                        <span id="preview-filename" class="text-sm truncate max-w-[150px]">filename.zip</span>
+                    </div>
+                    <button onclick="clearFile()" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center hover:bg-red-600 transition">×</button>
+                </div>
+
+                <div class="flex gap-2 items-end">
+                    <button onclick="document.getElementById('file-input').click()" class="w-12 h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-paperclip"></i>
+                    </button>
+                    <input type="file" id="file-input" class="hidden" onchange="handleFileSelect(this)">
+                    
+                    <div class="flex-1 bg-slate-800 rounded-xl flex items-center px-4 min-h-[48px]">
+                        <input type="text" id="msg-input" class="w-full bg-transparent border-none outline-none text-white placeholder-slate-500" placeholder="发送消息..." onkeypress="handleEnter(event)">
+                    </div>
+
+                    <button onclick="sendMessage()" class="w-12 h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition shadow-lg shadow-blue-600/20 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-    </main>
+    </div>
 
     <script>
-        const STORAGE_KEY = 'flux_timer_target';
-        const displayEl = document.getElementById('display');
-        const setupPanel = document.getElementById('setup-panel');
-        const runningPanel = document.getElementById('running-panel');
-        const targetDisplayEl = document.getElementById('target-display');
-        let animationFrameId;
+        // --- 核心配置 ---
+        const PEER_CONFIG = {
+            host: '0.peerjs.com', // 使用 PeerJS 免费公共信令服务器
+            port: 443,
+            secure: true,
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' }, // Google 公共 STUN (打洞)
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            }
+        };
 
-        // 初始化：检查是否有正在进行的倒计时
-        (function init() {
-            const savedTarget = localStorage.getItem(STORAGE_KEY);
-            if (savedTarget) {
-                const targetDate = parseInt(savedTarget, 10);
-                if (targetDate > Date.now()) {
-                    // 恢复倒计时
-                    switchUI(true);
-                    updateLoop(targetDate);
-                    // 显示目标时间文本
-                    const dateObj = new Date(targetDate);
-                    targetDisplayEl.innerText = formatTimeDisplay(dateObj);
+        // 生成 6 位随机码 (100000 - 999999)
+        const generateId = () => Math.floor(100000 + Math.random() * 900000).toString();
+        const myId = generateId();
+        
+        // --- 状态变量 ---
+        let peer;
+        let conn;
+        let fileChunks = [];
+        let receivingFile = null;
+
+        // --- 初始化 PeerJS ---
+        function initPeer() {
+            updateStatus('正在连接公共网络...', 'text-slate-500');
+            
+            peer = new Peer(myId, PEER_CONFIG);
+
+            peer.on('open', (id) => {
+                document.getElementById('my-id').innerText = id;
+                updateStatus('网络就绪，等待连接', 'text-green-500');
+            });
+
+            // 被动连接 (作为接收方)
+            peer.on('connection', (connection) => {
+                conn = connection;
+                setupConnection();
+                switchToChat();
+                // 自动回填对方ID方便识别
+                document.getElementById('target-id').value = conn.peer;
+            });
+
+            peer.on('error', (err) => {
+                console.error(err);
+                if(err.type === 'peer-unavailable') {
+                    updateStatus('找不到该 ID，请检查对方是否在线', 'text-red-500');
+                    resetBtn();
                 } else {
-                    // 时间已过，清理
-                    localStorage.removeItem(STORAGE_KEY);
-                    displayEl.innerText = "00:00:00";
+                    updateStatus('网络错误，请刷新重试', 'text-red-500');
+                }
+            });
+        }
+
+        // --- 主动连接逻辑 ---
+        function connectToPeer() {
+            const targetId = document.getElementById('target-id').value;
+            if (targetId.length !== 6) {
+                updateStatus('请输入 6 位有效连接码', 'text-yellow-500');
+                return;
+            }
+            if (targetId === myId) {
+                updateStatus('不能连接自己', 'text-yellow-500');
+                return;
+            }
+
+            const btn = document.getElementById('connect-btn');
+            btn.innerHTML = '<div class="loader"></div>';
+            btn.disabled = true;
+
+            conn = peer.connect(targetId);
+            
+            // 必须等待 open 事件
+            conn.on('open', () => {
+                setupConnection();
+                switchToChat();
+            });
+
+            // 3秒连不上则重置 (PeerJS有时超时不报错)
+            setTimeout(() => {
+                if(!conn.open) {
+                    resetBtn();
+                    updateStatus('连接超时，请重试', 'text-red-500');
+                }
+            }, 5000);
+        }
+
+        // --- 连接建立后的通用处理 ---
+        function setupConnection() {
+            conn.on('data', (data) => {
+                if (data.type === 'text') {
+                    appendMessage(data.content, false);
+                } else if (data.type === 'file-header') {
+                    startReceivingFile(data);
+                } else if (data.type === 'file-chunk') {
+                    receiveChunk(data.content);
+                } else if (data.type === 'file-end') {
+                    finishReceivingFile();
+                }
+            });
+
+            conn.on('close', () => {
+                alert('对方已断开连接');
+                location.reload();
+            });
+        }
+
+        // --- 文件传输逻辑 (核心难点: 切片) ---
+        const CHUNK_SIZE = 16 * 1024; // 16KB 切片 (WebRTC 最安全的大小)
+
+        async function sendFile(file) {
+            if (!conn || !conn.open) return;
+
+            // 1. 发送文件头
+            conn.send({
+                type: 'file-header',
+                name: file.name,
+                size: file.size,
+                fileType: file.type
+            });
+
+            // 本地显示
+            appendFileMessage(URL.createObjectURL(file), file.name, file.type, true);
+            showProgress(true);
+
+            // 2. 读取并切片发送
+            let offset = 0;
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                conn.send({
+                    type: 'file-chunk',
+                    content: e.target.result
+                });
+
+                offset += e.target.result.byteLength;
+                updateProgressBar(offset, file.size);
+
+                if (offset < file.size) {
+                    readNextChunk();
+                } else {
+                    conn.send({ type: 'file-end' });
+                    showProgress(false);
+                    clearFile(); // 发送完成后清除输入框
+                }
+            };
+
+            const readNextChunk = () => {
+                const slice = file.slice(offset, offset + CHUNK_SIZE);
+                reader.readAsArrayBuffer(slice);
+            };
+
+            readNextChunk();
+        }
+
+        // --- 文件接收逻辑 ---
+        function startReceivingFile(header) {
+            receivingFile = header;
+            fileChunks = [];
+            appendSystemMessage(`正在接收 ${header.name}...`);
+        }
+
+        function receiveChunk(buffer) {
+            fileChunks.push(buffer);
+            // 这里可以添加接收进度计算，暂略以保持代码简洁
+        }
+
+        function finishReceivingFile() {
+            const blob = new Blob(fileChunks, { type: receivingFile.fileType });
+            const url = URL.createObjectURL(blob);
+            appendFileMessage(url, receivingFile.name, receivingFile.fileType, false);
+            fileChunks = [];
+            receivingFile = null;
+        }
+
+        // --- UI 操作逻辑 ---
+        function sendMessage() {
+            const textInput = document.getElementById('msg-input');
+            const fileInput = document.getElementById('file-input');
+            const text = textInput.value;
+            const file = fileInput.files[0];
+
+            if (file) {
+                sendFile(file);
+            }
+
+            if (text) {
+                if(conn && conn.open) {
+                    conn.send({ type: 'text', content: text });
+                    appendMessage(text, true);
+                    textInput.value = '';
                 }
             }
-        })();
-
-        // 开始倒计时逻辑
-        function startCountdown() {
-            const timeInput = document.getElementById('target-time').value;
-            if (!timeInput) return;
-
-            const now = new Date();
-            const [hours, minutes] = timeInput.split(':').map(Number);
-
-            // 创建“明天”的时间对象
-            const targetDate = new Date(now);
-            targetDate.setDate(now.getDate() + 1); // 加一天
-            targetDate.setHours(hours, minutes, 0, 0);
-
-            const targetTimestamp = targetDate.getTime();
-
-            // 持久化存储
-            localStorage.setItem(STORAGE_KEY, targetTimestamp);
-            
-            // 更新UI
-            targetDisplayEl.innerText = timeInput;
-            switchUI(true);
-            
-            // 启动循环
-            updateLoop(targetTimestamp);
         }
 
-        // 核心循环：使用 requestAnimationFrame 保证流畅
-        function updateLoop(targetTimestamp) {
-            function step() {
-                const now = Date.now();
-                const diff = targetTimestamp - now;
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
 
-                if (diff <= 0) {
-                    // 倒计时结束
-                    localStorage.removeItem(STORAGE_KEY);
-                    displayEl.innerText = "00:00:00";
-                    // 可以加入结束时的提示音或震动
-                    switchUI(false);
-                    return;
-                }
+            const previewArea = document.getElementById('preview-area');
+            const imgPreview = document.getElementById('img-preview');
+            const infoPreview = document.getElementById('file-info-preview');
+            const nameSpan = document.getElementById('preview-filename');
 
-                // 计算时分秒
-                const h = Math.floor(diff / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-                
-                // 毫秒（可选，为了极简和省电，这里只显示到秒，如需毫秒可添加）
-                // const ms = Math.floor((diff % 1000) / 10);
+            previewArea.classList.remove('hidden');
 
-                // 格式化输出: 00:00:00
-                displayEl.innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
-
-                animationFrameId = requestAnimationFrame(step);
-            }
-            step();
-        }
-
-        // 重置/取消
-        function resetTimer() {
-            localStorage.removeItem(STORAGE_KEY);
-            cancelAnimationFrame(animationFrameId);
-            displayEl.innerText = "00:00:00";
-            switchUI(false);
-        }
-
-        // UI 切换辅助函数
-        function switchUI(isRunning) {
-            if (isRunning) {
-                setupPanel.classList.add('hidden');
-                runningPanel.classList.remove('hidden');
-                runningPanel.classList.add('fade-in');
+            if (file.type.startsWith('image/')) {
+                imgPreview.src = URL.createObjectURL(file);
+                imgPreview.classList.remove('hidden');
+                infoPreview.classList.add('hidden');
             } else {
-                setupPanel.classList.remove('hidden');
-                setupPanel.classList.add('fade-in');
-                runningPanel.classList.add('hidden');
+                imgPreview.classList.add('hidden');
+                infoPreview.classList.remove('hidden');
+                infoPreview.classList.add('flex');
+                nameSpan.innerText = file.name;
             }
         }
 
-        // 补零工具
-        function pad(num) {
-            return num.toString().padStart(2, '0');
+        function clearFile() {
+            document.getElementById('file-input').value = '';
+            document.getElementById('preview-area').classList.add('hidden');
         }
 
-        // 格式化时间显示
-        function formatTimeDisplay(date) {
-            return date.getHours().toString().padStart(2, '0') + ':' + 
-                   date.getMinutes().toString().padStart(2, '0');
+        function appendMessage(text, isSelf) {
+            const box = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = `flex w-full ${isSelf ? 'justify-end' : 'justify-start'} animate-fade`;
+            div.innerHTML = `
+                <div class="max-w-[80%] px-4 py-3 rounded-2xl text-sm ${isSelf ? 'msg-gradient text-white rounded-tr-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm'} shadow-md break-words">
+                    ${text}
+                </div>
+            `;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
         }
+
+        function appendFileMessage(url, name, type, isSelf) {
+            const box = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = `flex w-full ${isSelf ? 'justify-end' : 'justify-start'} animate-fade`;
+            
+            let content;
+            if (type.startsWith('image/')) {
+                content = `<img src="${url}" class="rounded-lg max-h-48 cursor-pointer hover:opacity-90 transition" onclick="window.open('${url}')">`;
+            } else if (type.startsWith('video/')) {
+                content = `<video src="${url}" controls class="rounded-lg max-h-48 w-full"></video>`;
+            } else {
+                content = `
+                    <div class="flex items-center gap-3 p-2">
+                        <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-xl">📄</div>
+                        <div class="overflow-hidden">
+                            <p class="truncate font-medium">${name}</p>
+                            ${!isSelf ? `<a href="${url}" download="${name}" class="text-xs text-blue-300 hover:text-white underline mt-1">点击下载</a>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            div.innerHTML = `
+                <div class="max-w-[80%] p-2 rounded-2xl ${isSelf ? 'msg-gradient text-white rounded-tr-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm'} shadow-md">
+                    ${content}
+                </div>
+            `;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function appendSystemMessage(text) {
+            const box = document.getElementById('chat-box');
+            box.innerHTML += `<div class="text-center my-2"><span class="text-xs text-slate-600 bg-slate-900/50 px-2 py-1 rounded">${text}</span></div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // --- 辅助功能 ---
+        function switchToChat() {
+            document.getElementById('connect-screen').classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                document.getElementById('connect-screen').style.display = 'none';
+                document.getElementById('chat-screen').classList.remove('hidden');
+                document.getElementById('chat-screen').classList.add('flex');
+            }, 500);
+        }
+
+        function updateStatus(msg, colorClass) {
+            const el = document.getElementById('status-msg');
+            el.innerText = msg;
+            el.className = `text-center text-xs h-4 ${colorClass}`;
+        }
+
+        function resetBtn() {
+            const btn = document.getElementById('connect-btn');
+            btn.innerHTML = '<span>发起连接</span><i class="fa-solid fa-arrow-right"></i>';
+            btn.disabled = false;
+        }
+
+        function copyId() {
+            navigator.clipboard.writeText(myId);
+            const originalText = document.getElementById('my-id').innerText;
+            document.getElementById('my-id').innerText = "已复制!";
+            setTimeout(() => document.getElementById('my-id').innerText = originalText, 1500);
+        }
+
+        function showProgress(show) {
+            document.getElementById('progress-bar-container').classList.toggle('hidden', !show);
+        }
+
+        function updateProgressBar(current, total) {
+            const percent = Math.floor((current / total) * 100);
+            document.getElementById('progress-fill').style.width = percent + '%';
+            document.getElementById('progress-percent').innerText = percent + '%';
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function disconnect() {
+            if(peer) peer.destroy();
+            location.reload();
+        }
+
+        // 启动
+        initPeer();
+
     </script>
 </body>
 </html>

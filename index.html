@@ -2,2654 +2,2240 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>美景随享 - 精美风景图片集</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>智能运动检测系统 Pro</title>
     <style>
-        :root {
-            --primary: #ff1493;
-            --primary-light: #ff69b4;
-            --secondary: #667eea;
-            --success: #48bb78;
-            --warning: #ed8936;
-            --danger: #f56565;
-            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --shadow: 0 20px 60px rgba(0,0,0,0.15);
-            --radius: 20px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        * { 
-            margin: 0; 
-            padding: 0; 
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
-        
+
+        :root {
+            --primary-color: #667eea;
+            --primary-dark: #5568d3;
+            --secondary-color: #764ba2;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+            --info-color: #2196f3;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            --card-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background: #f5f5f5;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            color: #333;
             overflow-x: hidden;
-            -webkit-touch-callout: none;
         }
-        
-        /* 下载按钮样式 */
-        .download-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(72, 187, 120, 0.95), rgba(56, 161, 105, 0.95));
-            backdrop-filter: blur(10px);
-            border: none;
-            color: white;
-            font-size: 1.3em;
-            cursor: pointer;
+
+        /* PC端404提示 */
+        .desktop-warning {
             display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: scale(0.8);
-        }
-        
-        .download-btn.show {
-            display: flex;
-            animation: downloadBtnAppear 0.4s ease forwards;
-        }
-        
-        @keyframes downloadBtnAppear {
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        .download-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
-            background: linear-gradient(135deg, rgba(56, 161, 105, 0.95), rgba(34, 139, 87, 0.95));
-        }
-        
-        .download-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .download-btn.downloading {
-            animation: downloadPulse 1s infinite;
-            pointer-events: none;
-        }
-        
-        @keyframes downloadPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        
-        /* 重试提示动画 */
-        @keyframes retry-pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-        
-        .image-loading.retrying {
-            animation: retry-pulse 1s infinite;
-            color: #ed8936;
-        }
-        
-        .retry-info {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(237, 137, 54, 0.9);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: 600;
-            z-index: 10;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
-        }
-        
-        #gamepadCursor {
-            position: fixed;
-            width: 30px;
-            height: 30px;
-            background: radial-gradient(circle, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.6));
-            border: 3px solid rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 99999;
-            display: none;
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6), 0 0 40px rgba(118, 75, 162, 0.4);
-            transition: transform 0.05s ease;
-        }
-        
-        #gamepadCursor.active {
-            display: block;
-        }
-        
-        #gamepadCursor::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 8px;
-            height: 8px;
-            background: white;
-            border-radius: 50%;
-        }
-        
-        .gamepad-toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 12px;
-            z-index: 100000;
-            display: none;
-            animation: slideInRight 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        
-        .gamepad-toast.show {
-            display: block;
-        }
-        
-        @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        #landscapeView {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .landscape-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .landscape-title {
-            text-align: center;
-            font-size: 2.5em;
-            font-weight: 700;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
-        }
-        
-        .landscape-subtitle {
-            text-align: center;
-            color: #718096;
-            margin-top: 8px;
-            font-size: 1em;
-        }
-        
-        .landscape-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
-        }
-        
-        .image-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-        }
-        
-        .image-card:hover, .image-card.gamepad-hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-        }
-        
-        .image-wrapper {
-            position: relative;
-            width: 100%;
-            height: 300px;
-            overflow: hidden;
-            background: #e2e8f0;
-        }
-        
-        .image-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-        
-        .image-card:hover img {
-            transform: scale(1.1);
-        }
-        
-        .image-loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #cbd5e0;
-            font-size: 1.2em;
-        }
-        
-        .image-info {
-            padding: 20px;
-        }
-        
-        .image-author {
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
-        
-        .image-dimensions {
-            color: #718096;
-            font-size: 0.9em;
-        }
-        
-        .refresh-btn {
-            position: fixed;
-            bottom: 40px;
-            right: 40px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            font-size: 1.8em;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-        
-        .refresh-btn:hover, .refresh-btn.gamepad-hover {
-            transform: rotate(180deg) scale(1.1);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
-        }
-        
-        .landscape-footer {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            text-align: center;
-            color: #718096;
-            margin-top: 60px;
-        }
-        
-        #secretTrigger {
-            cursor: default;
-        }
-        
-        .stone-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .stone-modal.active {
-            display: flex;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .stone-drop {
-            font-size: 8em;
-            animation: stoneDrop 1s ease-out;
-        }
-        
-        @keyframes stoneDrop {
-            0% {
-                transform: translateY(-500px) rotate(0deg);
-                opacity: 0;
-            }
-            60% {
-                transform: translateY(0) rotate(360deg);
-                opacity: 1;
-            }
-            70% {
-                transform: translateY(-50px) rotate(380deg);
-            }
-            80% {
-                transform: translateY(0) rotate(360deg);
-            }
-            90% {
-                transform: translateY(-20px) rotate(370deg);
-            }
-            100% {
-                transform: translateY(0) rotate(360deg);
-                opacity: 1;
-            }
-        }
-        
-        .hidden-stone {
-            position: fixed;
-            bottom: 120px;
-            right: 40px;
-            width: 50px;
-            height: 50px;
-            font-size: 2.5em;
-            cursor: pointer;
-            z-index: 60;
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .hidden-stone.visible {
-            display: block;
-        }
-        
-        #appView {
-            display: none;
-        }
-        
-        #appView.active {
-            display: block;
-        }
-        
-        body.app-mode {
             background: var(--bg-gradient);
-            padding: 20px;
-            color: #2d3748;
-        }
-        
-        .exit-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #fc8181, #f56565);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
             color: white;
-            border: none;
-            border-radius: 25px;
-            font-weight: 600;
-            cursor: pointer;
-            z-index: 1000;
-            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.4);
-            transition: all 0.3s;
-        }
-        
-        .exit-btn:hover, .exit-btn.gamepad-hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 101, 101, 0.6);
-        }
-        
-        .app-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border-radius: var(--radius);
-            padding: 30px;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 70px rgba(0,0,0,0.2);
-        }
-        
-        .full-width { grid-column: 1 / -1; }
-        
-        header {
             text-align: center;
-            margin-bottom: 10px;
-        }
-        
-        .logo {
-            font-size: 2.5em;
-            font-weight: 700;
-            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 2px;
-            animation: shimmer 3s infinite;
-        }
-        
-        @keyframes shimmer {
-            0%, 100% { filter: hue-rotate(0deg); }
-            50% { filter: hue-rotate(20deg); }
-        }
-        
-        .version {
-            color: #718096;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #4a5568;
-            font-size: 0.95em;
-        }
-        
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        
-        input[type="number"], select {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 1em;
-            font-family: 'Poppins', sans-serif;
-            transition: var(--transition);
-            background: white;
-        }
-        
-        input[type="number"]:focus, select:focus, 
-        input[type="number"].gamepad-focus, select.gamepad-focus {
-            outline: none;
-            border-color: var(--primary-light);
-            box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.1);
-            transform: scale(1.02);
-        }
-        
-        .input-unit {
-            position: absolute;
-            right: 15px;
-            color: #a0aec0;
-            font-size: 0.9em;
-            pointer-events: none;
-        }
-        
-        .range-slider {
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: linear-gradient(to right, #48bb78, #ecc94b, #f56565);
-            outline: none;
-            -webkit-appearance: none;
-            margin-top: 10px;
-        }
-        
-        .range-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .range-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-        
-        .toggle-section {
-            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-            border: 2px solid #7dd3fc;
-            border-radius: 15px;
             padding: 20px;
+        }
+
+        .desktop-warning h1 {
+            font-size: 72px;
             margin-bottom: 20px;
-            transition: var(--transition);
+            animation: pulse 2s ease-in-out infinite;
         }
-        
-        .toggle-section.active {
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-            border-color: var(--success);
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
-        
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-            flex: 1;
+
+        /* 顶部导航栏 */
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
         }
-        
-        .checkbox-wrapper input[type="checkbox"] {
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            position: relative;
-            appearance: none;
-            background: white;
-            border: 3px solid #cbd5e0;
-            border-radius: 6px;
-            transition: var(--transition);
-            flex-shrink: 0;
-        }
-        
-        .checkbox-wrapper input[type="checkbox"]:hover,
-        .checkbox-wrapper input[type="checkbox"].gamepad-hover {
-            border-color: var(--primary-light);
-            transform: scale(1.1);
-        }
-        
-        .checkbox-wrapper input[type="checkbox"]:checked {
-            background: linear-gradient(135deg, var(--success), #38a169);
-            border-color: var(--success);
-        }
-        
-        .checkbox-wrapper input[type="checkbox"]:checked::before {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.05em;
-            font-weight: 600;
-            color: #0c4a6e;
-        }
-        
-        .toggle-icon {
-            font-size: 1.8em;
-        }
-        
-        .toggle-status {
-            font-size: 0.85em;
-            color: #64748b;
-            margin-top: 8px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.6);
-            border-radius: 8px;
-        }
-        
-        .toggle-status.enabled {
-            color: #065f46;
-            background: rgba(167, 243, 208, 0.5);
-        }
-        
-        .settings-history {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border: 2px solid #f59e0b;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .settings-history h4 {
-            color: #92400e;
-            margin-bottom: 10px;
-            font-size: 0.95em;
-        }
-        
-        .history-item {
-            background: rgba(255,255,255,0.7);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            font-size: 0.85em;
+
+        .nav-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
-        
-        .history-timestamp {
-            color: #78350f;
-            font-size: 0.8em;
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: 700;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        
-        .history-actions {
+
+        .nav-status {
             display: flex;
-            gap: 5px;
+            align-items: center;
+            gap: 12px;
         }
-        
-        .btn-mini {
-            padding: 4px 10px;
-            font-size: 0.75em;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #f5f5f5;
+        }
+
+        .status-badge.active {
+            background: linear-gradient(135deg, #4caf5020 0%, #8bc34a20 100%);
+            color: var(--success-color);
+        }
+
+        .battery-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
             font-weight: 600;
         }
-        
-        .btn-restore {
-            background: linear-gradient(135deg, #60a5fa, #3b82f6);
-            color: white;
+
+        /* 标签页导航 */
+        .tab-nav {
+            display: flex;
+            padding: 0 16px;
+            background: white;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
-        
-        .btn-delete {
-            background: linear-gradient(135deg, #fca5a5, #f87171);
-            color: white;
+
+        .tab-nav::-webkit-scrollbar {
+            display: none;
         }
-        
-        .btn {
-            padding: 14px 28px;
+
+        .tab-btn {
+            flex-shrink: 0;
+            padding: 14px 20px;
             border: none;
-            border-radius: 12px;
-            font-size: 1em;
+            background: none;
+            font-size: 14px;
             font-weight: 600;
+            color: #666;
             cursor: pointer;
-            transition: var(--transition);
-            font-family: 'Poppins', sans-serif;
-            display: inline-flex;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--bg-gradient);
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* 主容器 */
+        .container {
+            padding: 120px 16px 80px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--card-shadow);
+            transition: box-shadow 0.3s;
+        }
+
+        .card:active {
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #333;
+            display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .card-title .icon {
+            font-size: 20px;
+        }
+
+        /* 视频预览 */
+        .video-container {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        #video {
+            width: 100%;
+            display: block;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .detection-box {
+            position: absolute;
+            border: 3px solid var(--success-color);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+            transition: all 0.2s;
+            pointer-events: none;
+        }
+
+        .detection-box.active {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 30px rgba(244, 67, 54, 0.8);
+        }
+
+        .detection-info {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .intensity-bar {
+            width: 100px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .intensity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), var(--danger-color));
+            transition: width 0.2s;
+        }
+
+        /* 控制按钮 */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            gap: 8px;
+            box-shadow: var(--card-shadow);
         }
-        
+
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            background: var(--bg-gradient);
             color: white;
-            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.3);
         }
-        
-        .btn-primary:hover:not(:disabled),
-        .btn-primary.gamepad-hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 20, 147, 0.4);
+
+        .btn-primary:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
-        
+
         .btn-secondary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+            background: white;
+            color: #333;
+            border: 2px solid #e0e0e0;
         }
-        
-        .btn-secondary:hover:not(:disabled),
-        .btn-secondary.gamepad-hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+
+        .btn-icon {
+            width: 48px;
+            height: 48px;
+            padding: 0;
         }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #fc8181, #f56565);
-            color: white;
-        }
-        
+
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
-        .btn-group {
-            display: flex;
+
+        /* 预设模式 */
+        .preset-modes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            flex-wrap: wrap;
         }
-        
-        .stat-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
-            border-radius: 15px;
-            padding: 20px;
+
+        .preset-btn {
+            padding: 16px 12px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
             text-align: center;
-            border: 2px solid rgba(255, 105, 180, 0.2);
+            font-weight: 600;
         }
-        
-        .stat-value {
-            font-size: 2.5em;
-            font-weight: 700;
-            background: linear-gradient(45deg, var(--primary-light), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 10px 0;
+
+        .preset-btn:active {
+            transform: scale(0.96);
         }
-        
-        .stat-label {
-            color: #718096;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+
+        .preset-btn.active {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        
-        .progress-container {
-            margin: 20px 0;
+
+        /* 滑块控制 */
+        .slider-group {
+            margin-bottom: 20px;
         }
-        
-        .progress-bar {
-            height: 12px;
-            background: #e2e8f0;
-            border-radius: 6px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-light), var(--primary));
-            width: 0%;
-            transition: width 0.5s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            animation: shimmer-progress 2s infinite;
-        }
-        
-        @keyframes shimmer-progress {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        .log-container {
-            height: 400px;
-            overflow-y: auto;
-            background: #f7fafc;
-            border-radius: 12px;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
-            border: 2px solid #e2e8f0;
-        }
-        
-        .log-entry {
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            animation: slideIn 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        .log-icon {
-            font-size: 1.2em;
-        }
-        
-        .log-insert {
-            background: linear-gradient(135deg, #fed7d7, #feb2b2);
-            border-left: 4px solid #f56565;
-        }
-        
-        .log-withdraw {
-            background: linear-gradient(135deg, #bee3f8, #90cdf4);
-            border-left: 4px solid #4299e1;
-        }
-        
-        .log-info {
-            background: linear-gradient(135deg, #feebc8, #fbd38d);
-            border-left: 4px solid #ed8936;
-        }
-        
-        .log-success {
-            background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
-            border-left: 4px solid #48bb78;
-        }
-        
-        .log-motivation {
-            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
-            border-left: 4px solid #6366f1;
-        }
-        
-        .safety-alert {
-            border: 2px solid;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .safety-alert.high {
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-            border-color: var(--success);
-        }
-        
-        .safety-alert.medium {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border-color: var(--warning);
-        }
-        
-        .safety-alert.low {
-            background: linear-gradient(135deg, #fed7d7, #fecaca);
-            border-color: var(--danger);
-        }
-        
-        .safety-icon {
-            font-size: 1.5em;
-        }
-        
-        .calculation-result {
-            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
-            border: 2px solid #4fd1c5;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 15px;
-        }
-        
-        .result-item {
+
+        .slider-label {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(79, 209, 197, 0.3);
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
         }
-        
-        .result-item:last-child {
+
+        .slider-value {
+            color: var(--primary-color);
+            font-size: 14px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #e0e0e0, #f5f5f5);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--bg-gradient);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .slider::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--bg-gradient);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 高级设置 */
+        .advanced-settings {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .advanced-settings.show {
+            max-height: 2000px;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea08 0%, #764ba208 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .stat-card:active {
+            border-color: var(--primary-color);
+            transform: scale(0.96);
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* 电池信息 */
+        .battery-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .battery-icon-large {
+            font-size: 48px;
+        }
+
+        .battery-details {
+            flex: 1;
+        }
+
+        .battery-percent {
+            font-size: 36px;
+            font-weight: 700;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .battery-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .battery-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), #8bc34a);
+            transition: width 0.3s;
+        }
+
+        .battery-fill.low {
+            background: linear-gradient(90deg, var(--danger-color), var(--warning-color));
+        }
+
+        .battery-text {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* 日志系统 */
+        .log-container {
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .log-header {
+            background: #2d2d2d;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        .log-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .log-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .log-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .log-btn:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .log-filters {
+            background: #252525;
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        .log-filters::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .log-filters::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 2px;
+        }
+
+        .filter-chip {
+            flex-shrink: 0;
+            padding: 6px 12px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #aaa;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .filter-chip.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .filter-chip.info { border-color: var(--info-color); }
+        .filter-chip.success { border-color: var(--success-color); }
+        .filter-chip.warning { border-color: var(--warning-color); }
+        .filter-chip.error { border-color: var(--danger-color); }
+
+        .log-content {
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            padding: 12px;
+            background: #1e1e1e;
+        }
+
+        .log-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-content::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .log-entry:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .log-time {
+            color: #666;
+            flex-shrink: 0;
+            width: 70px;
+        }
+
+        .log-level {
+            flex-shrink: 0;
+            width: 60px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .log-level.info { color: var(--info-color); }
+        .log-level.success { color: var(--success-color); }
+        .log-level.warning { color: var(--warning-color); }
+        .log-level.error { color: var(--danger-color); }
+
+        .log-message {
+            color: #ddd;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .log-detail {
+            color: #888;
+            font-size: 10px;
+        }
+
+        .log-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .log-stats {
+            background: #252525;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #3d3d3d;
+        }
+
+        .log-stat-item {
+            text-align: center;
+        }
+
+        .log-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .log-stat-label {
+            font-size: 10px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        /* 提示信息 */
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 3000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* 省电遮罩 */
+        .dim-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        /* 开关按钮 */
+        .switch-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .switch-row:last-child {
             border-bottom: none;
         }
-        
-        .result-value {
+
+        .switch-label {
+            font-size: 14px;
             font-weight: 600;
-            color: var(--primary);
+            color: #555;
         }
-        
-        .chart-container {
-            height: 200px;
-            display: flex;
-            align-items: flex-end;
-            gap: 5px;
-            padding: 10px;
-            background: #f7fafc;
-            border-radius: 12px;
-        }
-        
-        .chart-bar {
-            flex: 1;
-            background: linear-gradient(to top, var(--primary-light), var(--primary));
-            border-radius: 4px 4px 0 0;
-            transition: var(--transition);
+
+        .switch {
             position: relative;
+            width: 48px;
+            height: 28px;
         }
-        
-        .chart-bar:hover {
-            opacity: 0.8;
-            transform: scaleY(1.05);
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
-        
-        .health-report {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border: 3px solid #f59e0b;
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 20px;
-            animation: slideDown 0.5s ease;
-        }
-        
-        .health-report h3 {
-            color: #92400e;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-        
-        .health-item {
-            background: rgba(255,255,255,0.7);
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border-left: 4px solid #f59e0b;
-        }
-        
-        .health-item strong {
-            color: #92400e;
-        }
-        
-        .care-tips {
-            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-            border: 2px solid #3b82f6;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 15px;
-        }
-        
-        .care-tips h4 {
-            color: #1e40af;
-            margin-bottom: 12px;
-        }
-        
-        .care-tips ul {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .care-tips li {
-            padding: 8px 0;
-            padding-left: 25px;
-            position: relative;
-        }
-        
-        .care-tips li::before {
-            content: '✓';
+
+        .switch-slider {
             position: absolute;
+            cursor: pointer;
+            top: 0;
             left: 0;
-            color: #3b82f6;
-            font-weight: bold;
+            right: 0;
+            bottom: 0;
+            background-color: #ddd;
+            transition: 0.4s;
+            border-radius: 28px;
         }
-        
-        .hidden { display: none !important; }
-        
-        .celebration {
+
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked + .switch-slider {
+            background: var(--bg-gradient);
+        }
+
+        input:checked + .switch-slider:before {
+            transform: translateX(20px);
+        }
+
+        /* 底部操作栏 */
+        .bottom-bar {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 5em;
-            animation: celebrate 1s ease-out;
-            pointer-events: none;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 12px 16px;
+            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.1);
             z-index: 1000;
         }
-        
-        @keyframes celebrate {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+
+        .quick-actions {
+            display: flex;
+            gap: 8px;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+
+        .quick-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            color: var(--primary-color);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
         }
-        
-        .spinner {
-            animation: spin 1s linear infinite;
+
+        .quick-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #667eea25 0%, #764ba225 100%);
         }
-        
-        @media (max-width: 1024px) {
-            .app-container {
-                grid-template-columns: 1fr;
+
+        /* 响应式 */
+        @media (min-width: 768px) {
+            .desktop-warning {
+                display: flex !important;
             }
-            
-            .gallery-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 20px;
-            }
-            
-            .landscape-title {
-                font-size: 2em;
-            }
-            
-            .logo {
-                font-size: 2em;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            body.app-mode {
-                padding: 10px;
-            }
-            
-            .app-container {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .card {
-                padding: 20px;
-            }
-            
-            .logo {
-                font-size: 1.8em;
-            }
-            
-            .gallery-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .landscape-title {
-                font-size: 1.8em;
-            }
-            
-            .landscape-container {
-                padding: 20px 10px;
-            }
-            
-            .refresh-btn {
-                width: 50px;
-                height: 50px;
-                bottom: 20px;
-                right: 20px;
-                font-size: 1.5em;
-            }
-            
-            .hidden-stone {
-                bottom: 90px;
-                right: 20px;
-                font-size: 2em;
-            }
-            
-            .exit-btn {
-                top: 10px;
-                right: 10px;
-                padding: 10px 20px;
-                font-size: 0.9em;
-            }
-            
-            .stat-card {
-                padding: 15px;
-            }
-            
-            .stat-value {
-                font-size: 2em;
-            }
-            
-            .log-container {
-                height: 300px;
-                font-size: 0.8em;
-            }
-            
-            .gamepad-toast {
-                top: 10px;
-                right: 10px;
-                left: 10px;
-                padding: 12px 20px;
-                font-size: 0.9em;
-            }
-            
-            #gamepadCursor {
-                width: 40px;
-                height: 40px;
-                border-width: 4px;
-            }
-            
-            .download-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 1.1em;
-                top: 10px;
-                right: 10px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .landscape-title {
-                font-size: 1.5em;
-            }
-            
-            .logo {
-                font-size: 1.5em;
-            }
-            
-            .btn {
-                padding: 12px 20px;
-                font-size: 0.9em;
-            }
-            
-            .form-group label {
-                font-size: 0.9em;
-            }
-            
-            input[type="number"], select {
-                padding: 12px 15px;
-                font-size: 0.95em;
+
+            .container, .nav-bar, .bottom-bar {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
-    <div id="gamepadCursor"></div>
-    <div class="gamepad-toast" id="gamepadToast"></div>
-    <div class="stone-modal" id="stoneModal">
-        <div class="stone-drop">🪨</div>
+    <!-- PC端警告 -->
+    <div class="desktop-warning">
+        <h1>404</h1>
+        <p>⚠️ 本应用仅支持移动设备访问</p>
+        <p style="margin-top: 20px; font-size: 18px;">请使用手机或平板设备扫描二维码访问</p>
     </div>
-    <div class="hidden-stone" id="hiddenStone">🪨</div>
-    
-    <div id="landscapeView">
-        <div class="landscape-header">
-            <h1 class="landscape-title">🌄 美景随享</h1>
-            <p class="landscape-subtitle">发现世界各地的精美风景照片</p>
+
+    <!-- 顶部导航栏 -->
+    <div class="nav-bar">
+        <div class="nav-header">
+            <div class="nav-title">🎯 智能检测系统 Pro</div>
+            <div class="nav-status">
+                <div class="status-badge" id="statusBadge">
+                    <span id="statusIcon">⏸️</span>
+                    <span id="statusText">就绪</span>
+                </div>
+                <div class="battery-indicator">
+                    <span id="batteryIcon">🔋</span>
+                    <span id="batteryStatus">--</span>
+                </div>
+            </div>
         </div>
-        
-        <div class="landscape-container">
-            <div class="gallery-grid" id="gallery"></div>
-        </div>
-        
-        <button class="refresh-btn" onclick="refreshGallery()" title="刷新图片">
-            🔄
-        </button>
-        
-        <div class="landscape-footer">
-            <p>图片来源: Lorem Picsum | 每次刷新都有新惊喜</p>
-            <p style="margin-top: 10px; font-size: 0.9em;">© 2025 美景随享. All <span id="secretTrigger">r</span>ights reserved.</p>
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="monitor">📹 监控</button>
+            <button class="tab-btn" data-tab="settings">⚙️ 设置</button>
+            <button class="tab-btn" data-tab="logs">📝 日志</button>
+            <button class="tab-btn" data-tab="stats">📊 统计</button>
         </div>
     </div>
 
-    <div id="appView">
-        <button class="exit-btn" onclick="exitApp()">← 返回风景</button>
-        
-        <div class="app-container">
-            <div class="card full-width">
-                <header>
-                    <div class="logo">♥ PLEASURE ANALYTICS PRO ♥</div>
-                    <div class="version">Version 5.0 - 智能计算 | 设置记忆 | 健康监测</div>
-                </header>
+    <!-- 省电遮罩 -->
+    <div class="dim-overlay" id="dimOverlay"></div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 监控标签页 -->
+        <div class="tab-content active" data-tab="monitor">
+            <!-- 视频预览 -->
+            <div class="card">
+                <div class="video-container">
+                    <video id="video" autoplay playsinline muted></video>
+                    <div class="detection-box" id="detectionBox"></div>
+                    <div class="detection-info" id="detectionInfo">
+                        <span>运动强度: <span id="intensityText">0%</span></span>
+                        <div class="intensity-bar">
+                            <div class="intensity-fill" id="intensityFill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn">
+                        <span>▶️</span>
+                        <span>开始检测</span>
+                    </button>
+                    <button class="btn btn-secondary" id="pauseBtn" disabled>
+                        <span>⏸️</span>
+                        <span>暂停</span>
+                    </button>
+                    <button class="btn btn-icon btn-secondary" id="switchCameraBtn">
+                        <span>🔄</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 预设模式 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">⚡</span>
+                    <span>快速模式</span>
+                </div>
+                <div class="preset-modes">
+                    <button class="preset-btn active" data-preset="balanced">⚖️ 平衡模式</button>
+                    <button class="preset-btn" data-preset="sensitive">🔍 高灵敏度</button>
+                    <button class="preset-btn" data-preset="eco">🔋 省电模式</button>
+                    <button class="preset-btn" data-preset="security">🔒 安防模式</button>
+                    <button class="preset-btn" data-preset="silent">🔇 静音模式</button>
+                    <button class="preset-btn" data-preset="custom">⚙️ 自定义</button>
+                </div>
+            </div>
+
+            <!-- 快速调节 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🎛️</span>
+                    <span>快速调节</span>
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>检测区域大小</span>
+                        <span class="slider-value" id="detectionAreaValue">60%</span>
+                    </div>
+                    <input type="range" class="slider" id="detectionArea" min="30" max="100" value="60">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>检测灵敏度</span>
+                        <span class="slider-value" id="sensitivityValue">50</span>
+                    </div>
+                    <input type="range" class="slider" id="sensitivity" min="10" max="90" value="50">
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置标签页 -->
+        <div class="tab-content" data-tab="settings">
+            <!-- 检测参数 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🎯</span>
+                    <span>检测参数</span>
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>震动触发阈值</span>
+                        <span class="slider-value" id="vibrateThresholdValue">50%</span>
+                    </div>
+                    <input type="range" class="slider" id="vibrateThreshold" min="10" max="100" value="50">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>通知触发阈值</span>
+                        <span class="slider-value" id="notificationThresholdValue">60%</span>
+                    </div>
+                    <input type="range" class="slider" id="notificationThreshold" min="10" max="100" value="60">
+                </div>
+            </div>
+
+            <!-- 高级参数 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">⚙️</span>
+                    <span>高级参数</span>
+                </div>
+                <div class="advanced-settings" id="advancedSettings">
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>像素变化阈值</span>
+                            <span class="slider-value" id="pixelThresholdValue">40</span>
+                        </div>
+                        <input type="range" class="slider" id="pixelThreshold" min="10" max="100" value="40">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>检测频率 (帧/秒)</span>
+                            <span class="slider-value" id="frameRateValue">15</span>
+                        </div>
+                        <input type="range" class="slider" id="frameRate" min="5" max="30" value="15">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>最小持续时间 (ms)</span>
+                            <span class="slider-value" id="minDurationValue">500</span>
+                        </div>
+                        <input type="range" class="slider" id="minDuration" min="100" max="2000" step="100" value="500">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>采样步进 (像素)</span>
+                            <span class="slider-value" id="sampleStepValue">4</span>
+                        </div>
+                        <input type="range" class="slider" id="sampleStep" min="2" max="10" value="4">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 反馈设置 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🔔</span>
+                    <span>反馈设置</span>
+                </div>
+                <div class="switch-row">
+                    <span class="switch-label">启用震动反馈</span>
+                    <label class="switch">
+                        <input type="checkbox" id="vibrateEnabled" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>震动间隔 (秒)</span>
+                        <span class="slider-value" id="vibrateIntervalValue">2.0</span>
+                    </div>
+                    <input type="range" class="slider" id="vibrateInterval" min="0.5" max="5" step="0.5" value="2">
+                </div>
+                <div class="switch-row">
+                    <span class="switch-label">启用音频提示</span>
+                    <label class="switch">
+                        <input type="checkbox" id="audioEnabled" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>音量</span>
+                        <span class="slider-value" id="volumeValue">50%</span>
+                    </div>
+                    <input type="range" class="slider" id="volume" min="0" max="100" value="50">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>通知间隔 (秒)</span>
+                        <span class="slider-value" id="notificationIntervalValue">10</span>
+                    </div>
+                    <input type="range" class="slider" id="notificationInterval" min="3" max="30" value="10">
+                </div>
+                <div class="switch-row">
+                    <span class="switch-label">持续监控模式</span>
+                    <label class="switch">
+                        <input type="checkbox" id="continuousMode" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 电源管理 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🔋</span>
+                    <span>电源管理</span>
+                </div>
+                <div class="battery-card">
+                    <span class="battery-icon-large" id="batteryIconLarge">🔋</span>
+                    <div class="battery-details">
+                        <div class="battery-percent" id="batteryPercent">--</div>
+                        <div class="battery-bar">
+                            <div class="battery-fill" id="batteryFill" style="width: 0%"></div>
+                        </div>
+                        <div class="battery-text" id="batteryCharging">检测中...</div>
+                        <div class="battery-text" id="batteryTime">--</div>
+                    </div>
+                </div>
+                <div class="switch-row">
+                    <span class="switch-label">自动变暗 (省电)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="autoDimEnabled" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>变暗触发时间 (秒)</span>
+                        <span class="slider-value" id="dimTimeoutValue">30</span>
+                    </div>
+                    <input type="range" class="slider" id="dimTimeout" min="10" max="120" step="10" value="30">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>亮度降低程度</span>
+                        <span class="slider-value" id="dimLevelValue">70%</span>
+                    </div>
+                    <input type="range" class="slider" id="dimLevel" min="30" max="90" value="70">
+                </div>
+            </div>
+        </div>
+
+        <!-- 日志标签页 -->
+        <div class="tab-content" data-tab="logs">
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="log-container">
+                    <div class="log-header">
+                        <div class="log-title">
+                            <span>📝</span>
+                            <span>实时日志</span>
+                            <span style="margin-left: 8px; color: #666; font-size: 12px;" id="logCount">(0)</span>
+                        </div>
+                        <div class="log-actions">
+                            <button class="log-btn" id="clearLogsBtn">清空</button>
+                            <button class="log-btn" id="exportLogsBtn">导出CSV</button>
+                        </div>
+                    </div>
+                    <div class="log-filters">
+                        <div class="filter-chip active" data-filter="all">全部</div>
+                        <div class="filter-chip info" data-filter="info">ℹ️ 信息</div>
+                        <div class="filter-chip success" data-filter="success">✅ 成功</div>
+                        <div class="filter-chip warning" data-filter="warning">⚠️ 警告</div>
+                        <div class="filter-chip error" data-filter="error">❌ 错误</div>
+                    </div>
+                    <div class="log-content" id="logContent">
+                        <div class="log-empty">📝 暂无日志记录</div>
+                    </div>
+                    <div class="log-stats">
+                        <div class="log-stat-item">
+                            <div class="log-stat-value" id="logInfoCount">0</div>
+                            <div class="log-stat-label">信息</div>
+                        </div>
+                        <div class="log-stat-item">
+                            <div class="log-stat-value" id="logSuccessCount">0</div>
+                            <div class="log-stat-label">成功</div>
+                        </div>
+                        <div class="log-stat-item">
+                            <div class="log-stat-value" id="logWarningCount">0</div>
+                            <div class="log-stat-label">警告</div>
+                        </div>
+                        <div class="log-stat-item">
+                            <div class="log-stat-value" id="logErrorCount">0</div>
+                            <div class="log-stat-label">错误</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计标签页 -->
+        <div class="tab-content" data-tab="stats">
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">📊</span>
+                    <span>运行统计</span>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <span class="stat-value" id="detectionCount">0</span>
+                        <span class="stat-label">检测次数</span>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📳</div>
+                        <span class="stat-value" id="vibrateCount">0</span>
+                        <span class="stat-label">震动次数</span>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔔</div>
+                        <span class="stat-value" id="notificationCount">0</span>
+                        <span class="stat-label">通知次数</span>
+                    </div>
+                </div>
             </div>
 
             <div class="card">
-                <h2 style="margin-bottom: 20px; color: var(--primary);">⚙️ 参数设置</h2>
-                
-                <div class="toggle-section" id="lubeSection">
-                    <div class="toggle-row">
-                        <label class="checkbox-wrapper">
-                            <input type="checkbox" id="useLube" onchange="toggleLube()">
-                            <div class="checkbox-label">
-                                <span class="toggle-icon">💧</span>
-                                <span>使用润滑剂</span>
-                            </div>
-                        </label>
-                    </div>
-                    <div class="toggle-status" id="lubeStatus">未使用润滑剂</div>
+                <div class="card-title">
+                    <span class="icon">⏱️</span>
+                    <span>运行时间</span>
                 </div>
-                
-                <div class="toggle-section" id="tipsSection">
-                    <div class="toggle-row">
-                        <label class="checkbox-wrapper">
-                            <input type="checkbox" id="showMotivation" checked onchange="toggleMotivation()">
-                            <div class="checkbox-label">
-                                <span class="toggle-icon">💬</span>
-                                <span>中途鼓励提示</span>
-                            </div>
-                        </label>
-                    </div>
-                    <div class="toggle-status enabled" id="motivationStatus">已开启</div>
-                </div>
-                
-                <div class="form-group">
-                    <label>玩具长度 (cm)</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="toyLength" min="1" max="150" step="0.1" value="15" onchange="saveSettings()">
-                        <span class="input-unit">cm</span>
-                    </div>
-                    <input type="range" class="range-slider" id="lengthSlider" min="1" max="150" step="0.1" value="15">
-                </div>
-                
-                <div class="form-group">
-                    <label>玩具直径 (cm)</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="toyDiameter" min="0.5" max="10" step="0.1" value="3" onchange="saveSettings()">
-                        <span class="input-unit">cm</span>
-                    </div>
-                    <input type="range" class="range-slider" id="diameterSlider" min="0.5" max="10" step="0.1" value="3">
-                </div>
-                
-                <div class="form-group">
-                    <label>使用次数</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="totalCount" min="2" max="100" step="2" value="10" onchange="saveSettings()">
-                        <span class="input-unit">次</span>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>使用经验</label>
-                    <select id="experience" onchange="saveSettings()">
-                        <option value="beginner">初学者</option>
-                        <option value="intermediate" selected>中级者</option>
-                        <option value="advanced">高级者</option>
-                        <option value="expert">专家级</option>
-                    </select>
-                </div>
-                
-                <div class="btn-group">
-                    <button class="btn btn-secondary" onclick="calculateParams()">
-                        🧮 智能计算
-                    </button>
-                    <button class="btn btn-primary" id="startBtn" onclick="startSession()" disabled>
-                        ▶️ 开始会话
-                    </button>
-                </div>
-                
-                <div id="calculationResult" class="hidden"></div>
-                <div id="safetyAlert" class="hidden"></div>
-                
-                <div class="settings-history hidden" id="settingsHistory">
-                    <h4>📋 最近设置记录</h4>
-                    <div id="historyList"></div>
-                    <div style="text-align: center; margin-top: 10px;">
-                        <button class="btn-mini" style="background: #64748b; color: white;" onclick="clearAllHistory()">
-                            清空所有记录
-                        </button>
-                    </div>
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 48px; font-weight: 700; background: var(--bg-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" id="runningTime">00:00:00</div>
+                    <div style="color: #666; margin-top: 8px; font-size: 14px;">累计运行时长</div>
                 </div>
             </div>
 
             <div class="card">
-                <h2 style="margin-bottom: 20px; color: var(--primary);">📊 实时统计</h2>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div class="stat-card">
-                        <div class="stat-label">运行时间</div>
-                        <div class="stat-value" id="timer">00:00:00</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">完成进度</div>
-                        <div class="stat-value" id="progress">0%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">插入次数</div>
-                        <div class="stat-value" id="insertCount">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">剩余时间</div>
-                        <div class="stat-value" id="remaining">--:--</div>
-                    </div>
-                </div>
-                
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressBar"></div>
-                    </div>
-                </div>
-                
-                <div class="btn-group hidden" id="controlButtons">
-                    <button class="btn btn-secondary" onclick="pauseSession()">
-                        ⏸️ <span id="pauseText">暂停</span>
-                    </button>
-                    <button class="btn btn-danger" onclick="stopSession()">
-                        ⏹️ 停止
-                    </button>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <h3 style="font-size: 1em; color: #4a5568; margin-bottom: 10px;">会话历史</h3>
-                    <div class="chart-container" id="historyChart">
-                        <div style="text-align: center; width: 100%; color: #a0aec0;">暂无数据</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card full-width">
-                <h2 style="margin-bottom: 15px; color: var(--primary);">📝 活动日志</h2>
-                <div class="log-container" id="logContainer">
-                    <div class="log-entry log-info">
-                        <span class="log-icon">ℹ️</span>
-                        <span>系统就绪 - 您的设置会自动保存</span>
-                    </div>
-                </div>
-                
-                <div id="healthReport" class="hidden"></div>
+                <button class="btn btn-secondary" id="resetStatsBtn" style="width: 100%;">
+                    <span>🔄</span>
+                    <span>重置统计数据</span>
+                </button>
             </div>
         </div>
     </div>
+
+    <!-- 底部操作栏 -->
+    <div class="bottom-bar">
+        <div class="quick-actions">
+            <button class="quick-btn" id="quickVibrate">📳 测试震动</button>
+            <button class="quick-btn" id="quickNotify">🔔 测试通知</button>
+        </div>
+    </div>
+
+    <!-- 提示信息 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 隐藏的Canvas -->
+    <canvas id="canvas"></canvas>
 
     <script>
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
-        document.addEventListener('copy', (e) => e.preventDefault());
-        document.addEventListener('cut', (e) => e.preventDefault());
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'x' || e.key === 'X' || e.key === 'a' || e.key === 'A')) {
-                e.preventDefault();
-            }
-        });
-        
-        // ========== 图片加载管理器（带自动重试和下载功能） ==========
-        const ImageLoadManager = {
-            maxRetries: 3,
-            retryDelay: 2000,
-            retryingImages: new Map(),
-            
-            createImageCardWithRetry(id, container) {
-                const card = document.createElement('div');
-                card.className = 'image-card';
-                card.dataset.imageId = id;
-                
-                const wrapper = document.createElement('div');
-                wrapper.className = 'image-wrapper';
-                
-                const loading = document.createElement('div');
-                loading.className = 'image-loading spinner';
-                loading.textContent = '⏳';
-                wrapper.appendChild(loading);
-                
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'download-btn';
-                downloadBtn.innerHTML = '⬇️';
-                downloadBtn.title = '下载图片';
-                downloadBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    this.downloadImage(img, id);
-                };
-                wrapper.appendChild(downloadBtn);
-                
-                const img = document.createElement('img');
-                img.src = `https://picsum.photos/id/${id}/400/300`;
-                img.alt = '风景照片';
-                img.style.display = 'none';
-                
-                img.onload = () => {
-                    loading.style.display = 'none';
-                    img.style.display = 'block';
-                    this.retryingImages.delete(id);
-                    
-                    setTimeout(() => {
-                        downloadBtn.classList.add('show');
-                    }, 300);
-                };
-                
-                img.onerror = () => {
-                    this.handleImageError(img, loading, id, 1, downloadBtn);
-                };
-                
-                wrapper.appendChild(img);
-                card.appendChild(wrapper);
-                
-                const info = document.createElement('div');
-                info.className = 'image-info';
-                info.innerHTML = `
-                    <div class="image-author">Image #${id}</div>
-                    <div class="image-dimensions">400 × 300 px</div>
-                `;
-                card.appendChild(info);
-                
-                container.appendChild(card);
+        // ============ 全局变量 ============
+        let video, canvas, ctx;
+        let isDetecting = false;
+        let isPaused = false;
+        let previousImageData = null;
+        let currentCamera = 'user';
+        let wakeLock = null;
+        let detectionInterval = null;
+        let audioContext = null;
+        let runningStartTime = null;
+        let runningTimeInterval = null;
+
+        // 统计数据
+        let stats = {
+            detections: 0,
+            vibrations: 0,
+            notifications: 0
+        };
+
+        // 配置参数
+        let config = {
+            detectionArea: 60,
+            vibrateEnabled: true,
+            vibrateThreshold: 50,
+            notificationThreshold: 60,
+            sensitivity: 50,
+            pixelThreshold: 40,
+            frameRate: 15,
+            minDuration: 500,
+            sampleStep: 4,
+            volume: 50,
+            audioEnabled: true,
+            vibrateInterval: 2,
+            notificationInterval: 10,
+            continuousMode: true,
+            autoDimEnabled: true,
+            dimTimeout: 30,
+            dimLevel: 70
+        };
+
+        // 时间戳控制
+        let lastVibrateTime = 0;
+        let lastNotificationTime = 0;
+        let motionStartTime = 0;
+        let isInMotion = false;
+        let currentIntensity = 0;
+
+        // 日志系统
+        let logs = [];
+        let currentLogFilter = 'all';
+        const MAX_LOGS = 500;
+        let logStats = { info: 0, success: 0, warning: 0, error: 0 };
+
+        // 预设配置
+        const presets = {
+            balanced: {
+                sensitivity: 50, pixelThreshold: 40, frameRate: 15, minDuration: 500, sampleStep: 4,
+                vibrateThreshold: 50, notificationThreshold: 60
             },
+            sensitive: {
+                sensitivity: 80, pixelThreshold: 20, frameRate: 25, minDuration: 200, sampleStep: 2,
+                vibrateThreshold: 30, notificationThreshold: 40
+            },
+            eco: {
+                sensitivity: 30, pixelThreshold: 60, frameRate: 8, minDuration: 1000, sampleStep: 8,
+                vibrateThreshold: 70, notificationThreshold: 80
+            },
+            security: {
+                sensitivity: 90, pixelThreshold: 15, frameRate: 30, minDuration: 100, sampleStep: 2,
+                vibrateThreshold: 20, notificationThreshold: 25
+            },
+            silent: {
+                sensitivity: 50, pixelThreshold: 40, frameRate: 15, minDuration: 500, sampleStep: 4,
+                vibrateThreshold: 100, notificationThreshold: 100
+            }
+        };
+
+        // 省电模式
+        let dimTimer = null;
+        let isDimmed = false;
+
+        // 电池监控
+        let batteryChargeHistory = [];
+
+        // ============ 日志系统函数 ============
+        function addLog(level, message, detail = '') {
+            const timestamp = new Date();
+            const timeStr = timestamp.toLocaleTimeString('zh-CN');
             
-            handleImageError(img, loading, originalId, attemptNumber, downloadBtn) {
-                downloadBtn.classList.remove('show');
-                
-                if (attemptNumber > this.maxRetries) {
-                    loading.textContent = '❌';
-                    loading.classList.remove('spinner', 'retrying');
-                    this.retryingImages.delete(originalId);
-                    
-                    setTimeout(() => {
-                        const newId = Math.floor(Math.random() * 1000);
-                        this.retryWithNewId(img, loading, newId, downloadBtn);
-                    }, 5000);
+            const log = {
+                id: Date.now() + Math.random(),
+                time: timeStr,
+                timestamp: timestamp.getTime(),
+                level: level,
+                message: message,
+                detail: detail
+            };
+            
+            logs.unshift(log);
+            logStats[level]++;
+            
+            if (logs.length > MAX_LOGS) {
+                const removed = logs.pop();
+                logStats[removed.level]--;
+            }
+            
+            updateLogDisplay();
+            updateLogStats();
+        }
+
+        function updateLogDisplay() {
+            const logContent = document.getElementById('logContent');
+            const filteredLogs = currentLogFilter === 'all' 
+                ? logs 
+                : logs.filter(log => log.level === currentLogFilter);
+            
+            if (filteredLogs.length === 0) {
+                logContent.innerHTML = '<div class="log-empty">📝 暂无日志记录</div>';
+                return;
+            }
+            
+            logContent.innerHTML = filteredLogs.map(log => `
+                <div class="log-entry">
+                    <span class="log-time">${log.time}</span>
+                    <span class="log-level ${log.level}">${log.level}</span>
+                    <span class="log-message">
+                        ${log.message}
+                        ${log.detail ? `<div class="log-detail">${log.detail}</div>` : ''}
+                    </span>
+                </div>
+            `).join('');
+            
+            document.getElementById('logCount').textContent = `(${logs.length})`;
+            logContent.scrollTop = 0;
+        }
+
+        function updateLogStats() {
+            document.getElementById('logInfoCount').textContent = logStats.info;
+            document.getElementById('logSuccessCount').textContent = logStats.success;
+            document.getElementById('logWarningCount').textContent = logStats.warning;
+            document.getElementById('logErrorCount').textContent = logStats.error;
+        }
+
+        function clearLogs() {
+            if (logs.length === 0) return;
+            
+            if (confirm('确定要清空所有日志吗?')) {
+                logs = [];
+                logStats = { info: 0, success: 0, warning: 0, error: 0 };
+                updateLogDisplay();
+                updateLogStats();
+                showToast('🗑️ 已清空所有日志');
+            }
+        }
+
+        function exportLogs() {
+            if (logs.length === 0) {
+                showToast('⚠️ 没有可导出的日志');
+                return;
+            }
+            
+            const headers = ['时间戳', '时间', '级别', '消息', '详细信息'];
+            const csvRows = [headers.join(',')];
+            
+            const sortedLogs = [...logs].reverse();
+            
+            sortedLogs.forEach(log => {
+                const row = [
+                    log.timestamp,
+                    `"${log.time}"`,
+                    log.level.toUpperCase(),
+                    `"${log.message.replace(/"/g, '""')}"`,
+                    `"${log.detail.replace(/"/g, '""')}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            const csv = csvRows.join('\n');
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const filename = `motion-detector-logs-${timestamp}.csv`;
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            
+            addLog('success', '日志导出成功', `文件名: ${filename}, 共 ${logs.length} 条记录`);
+            showToast('✅ 日志已导出为CSV文件');
+        }
+
+        // ============ 初始化 ============
+        document.addEventListener('DOMContentLoaded', () => {
+            initElements();
+            initEventListeners();
+            loadSettings();
+            checkDeviceType();
+            initBatteryMonitor();
+            requestNotificationPermission();
+            showWelcomeToast();
+            initUserActivityTracking();
+            
+            addLog('info', '系统初始化完成', '运动检测系统已就绪');
+        });
+
+        function initElements() {
+            video = document.getElementById('video');
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d', { willReadFrequently: true });
+        }
+
+        function initEventListeners() {
+            // 标签页切换
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const targetTab = e.target.dataset.tab;
+                    switchTab(targetTab);
+                });
+            });
+
+            // 控制按钮
+            document.getElementById('startBtn').addEventListener('click', toggleDetection);
+            document.getElementById('pauseBtn').addEventListener('click', togglePause);
+            document.getElementById('switchCameraBtn').addEventListener('click', switchCamera);
+            document.getElementById('resetStatsBtn').addEventListener('click', resetStats);
+
+            // 日志按钮
+            document.getElementById('clearLogsBtn').addEventListener('click', clearLogs);
+            document.getElementById('exportLogsBtn').addEventListener('click', exportLogs);
+
+            // 日志过滤
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentLogFilter = e.target.dataset.filter;
+                    updateLogDisplay();
+                });
+            });
+
+            // 快速操作
+            document.getElementById('quickVibrate').addEventListener('click', () => {
+                if (!config.vibrateEnabled) {
+                    showToast('⚠️ 震动反馈已禁用，请在设置中启用');
+                    addLog('warning', '震动测试失败', '震动功能已被禁用');
                     return;
                 }
                 
-                loading.classList.remove('spinner');
-                loading.classList.add('retrying');
-                loading.textContent = '🔄';
-                
-                const wrapper = img.parentElement;
-                let retryInfo = wrapper.querySelector('.retry-info');
-                if (!retryInfo) {
-                    retryInfo = document.createElement('div');
-                    retryInfo.className = 'retry-info';
-                    wrapper.appendChild(retryInfo);
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(200);
+                    showToast('📳 震动测试完成');
+                    addLog('info', '执行震动测试');
+                } else {
+                    showToast('⚠️ 设备不支持震动');
+                    addLog('error', '震动测试失败', '设备不支持震动API');
                 }
-                retryInfo.textContent = `重试中 ${attemptNumber}/${this.maxRetries}`;
-                
-                this.retryingImages.set(originalId, attemptNumber);
-                
-                setTimeout(() => {
-                    const newId = Math.floor(Math.random() * 1000);
-                    img.src = `https://picsum.photos/id/${newId}/400/300?t=${Date.now()}`;
-                    
-                    img.onerror = () => {
-                        this.handleImageError(img, loading, originalId, attemptNumber + 1, downloadBtn);
-                    };
-                    
-                    img.onload = () => {
-                        loading.style.display = 'none';
-                        img.style.display = 'block';
-                        if (retryInfo) {
-                            retryInfo.remove();
-                        }
-                        this.retryingImages.delete(originalId);
-                        
-                        setTimeout(() => {
-                            downloadBtn.classList.add('show');
-                        }, 300);
-                        
-                        const card = img.closest('.image-card');
-                        const author = card.querySelector('.image-author');
-                        if (author) {
-                            author.textContent = `Image #${newId}`;
-                        }
-                        card.dataset.imageId = newId;
-                    };
-                }, this.retryDelay);
-            },
-            
-            retryWithNewId(img, loading, newId, downloadBtn) {
-                loading.classList.add('spinner');
-                loading.classList.remove('retrying');
-                loading.textContent = '⏳';
-                img.style.display = 'none';
-                downloadBtn.classList.remove('show');
-                
-                const wrapper = img.parentElement;
-                const retryInfo = wrapper.querySelector('.retry-info');
-                if (retryInfo) {
-                    retryInfo.textContent = '重新加载...';
-                }
-                
-                img.src = `https://picsum.photos/id/${newId}/400/300?t=${Date.now()}`;
-                
-                img.onload = () => {
-                    loading.style.display = 'none';
-                    img.style.display = 'block';
-                    if (retryInfo) {
-                        retryInfo.remove();
-                    }
-                    
-                    setTimeout(() => {
-                        downloadBtn.classList.add('show');
-                    }, 300);
-                    
-                    const card = img.closest('.image-card');
-                    const author = card.querySelector('.image-author');
-                    if (author) {
-                        author.textContent = `Image #${newId}`;
-                    }
-                    card.dataset.imageId = newId;
-                };
-                
-                img.onerror = () => {
-                    this.handleImageError(img, loading, newId, 1, downloadBtn);
-                };
-            },
-            
-            async downloadImage(img, imageId) {
-                const downloadBtn = img.parentElement.querySelector('.download-btn');
-                
-                downloadBtn.classList.add('downloading');
-                downloadBtn.innerHTML = '⏳';
-                
-                try {
-                    const response = await fetch(img.src);
-                    const blob = await response.blob();
-                    
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `landscape-${imageId}-${Date.now()}.jpg`;
-                    document.body.appendChild(a);
-                    a.click();
-                    
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(url);
-                        
-                        downloadBtn.classList.remove('downloading');
-                        downloadBtn.innerHTML = '✅';
-                        
-                        setTimeout(() => {
-                            downloadBtn.innerHTML = '⬇️';
-                        }, 2000);
-                    }, 100);
-                    
-                } catch (error) {
-                    console.error('下载失败:', error);
-                    downloadBtn.classList.remove('downloading');
-                    downloadBtn.innerHTML = '❌';
-                    
-                    setTimeout(() => {
-                        downloadBtn.innerHTML = '⬇️';
-                    }, 2000);
-                }
-            }
-        };
-        
-        // ========== 手柄控制系统 ==========
-        const GamepadController = {
-            connected: false,
-            gamepad: null,
-            cursorX: window.innerWidth / 2,
-            cursorY: window.innerHeight / 2,
-            lastButtons: [],
-            scrollSpeed: 20,
-            cursorSpeed: 8,
-            deadzone: 0.15,
-            updateInterval: null,
-            
-            init() {
-                window.addEventListener('gamepadconnected', (e) => this.onConnect(e));
-                window.addEventListener('gamepaddisconnected', (e) => this.onDisconnect(e));
-                this.checkGamepads();
-            },
-            
-            checkGamepads() {
-                const gamepads = navigator.getGamepads();
-                if (gamepads && gamepads[0]) {
-                    if (!this.connected) {
-                        this.onConnect({ gamepad: gamepads[0] });
-                    }
-                }
-            },
-            
-            onConnect(e) {
-                this.connected = true;
-                this.gamepad = e.gamepad;
-                this.showToast(`🎮 手柄已连接: ${e.gamepad.id}`);
-                this.showCursor();
-                this.startUpdate();
-            },
-            
-            onDisconnect(e) {
-                this.connected = false;
-                this.showToast('❌ 手柄已断开');
-                this.hideCursor();
-                this.stopUpdate();
-            },
-            
-            showToast(message) {
-                const toast = document.getElementById('gamepadToast');
-                toast.textContent = message;
-                toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 3000);
-            },
-            
-            showCursor() {
-                const cursor = document.getElementById('gamepadCursor');
-                cursor.classList.add('active');
-                cursor.style.left = this.cursorX + 'px';
-                cursor.style.top = this.cursorY + 'px';
-            },
-            
-            hideCursor() {
-                document.getElementById('gamepadCursor').classList.remove('active');
-            },
-            
-            startUpdate() {
-                if (this.updateInterval) return;
-                this.updateInterval = setInterval(() => this.update(), 16);
-            },
-            
-            stopUpdate() {
-                if (this.updateInterval) {
-                    clearInterval(this.updateInterval);
-                    this.updateInterval = null;
-                }
-            },
-            
-            update() {
-                const gamepads = navigator.getGamepads();
-                if (!gamepads || !gamepads[0]) return;
-                
-                const gp = gamepads[0];
-                
-                const leftX = this.applyDeadzone(gp.axes[0]);
-                const leftY = this.applyDeadzone(gp.axes[1]);
-                
-                if (leftX !== 0 || leftY !== 0) {
-                    this.cursorX += leftX * this.cursorSpeed;
-                    this.cursorY += leftY * this.cursorSpeed;
-                    
-                    this.cursorX = Math.max(0, Math.min(window.innerWidth, this.cursorX));
-                    this.cursorY = Math.max(0, Math.min(window.innerHeight, this.cursorY));
-                    
-                    const cursor = document.getElementById('gamepadCursor');
-                    cursor.style.left = this.cursorX + 'px';
-                    cursor.style.top = this.cursorY + 'px';
-                    
-                    this.updateHoverElement();
-                }
-                
-                const rightY = this.applyDeadzone(gp.axes[3]);
-                if (Math.abs(rightY) > 0) {
-                    window.scrollBy(0, rightY * this.scrollSpeed);
-                }
-                
-                this.handleButtons(gp);
-            },
-            
-            applyDeadzone(value) {
-                return Math.abs(value) < this.deadzone ? 0 : value;
-            },
-            
-            updateHoverElement() {
-                const element = document.elementFromPoint(this.cursorX, this.cursorY);
-                
-                document.querySelectorAll('.gamepad-hover').forEach(el => {
-                    el.classList.remove('gamepad-hover');
+            });
+
+            document.getElementById('quickNotify').addEventListener('click', () => {
+                sendNotification(75);
+                addLog('info', '发送测试通知');
+            });
+
+            // 预设模式
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    applyPreset(e.target.dataset.preset);
                 });
-                
-                if (element) {
-                    if (element.matches('button, a, input, select, .image-card, .btn-mini, .download-btn')) {
-                        element.classList.add('gamepad-hover');
-                    }
-                }
-            },
+            });
+
+            // 滑块事件
+            const sliders = ['detectionArea', 'vibrateThreshold', 'notificationThreshold', 
+                            'sensitivity', 'pixelThreshold', 'frameRate', 'minDuration', 
+                            'sampleStep', 'volume', 'vibrateInterval', 'notificationInterval',
+                            'dimTimeout', 'dimLevel'];
             
-            handleButtons(gp) {
-                const buttons = gp.buttons;
-                
-                if (this.isButtonPressed(buttons[0], 0)) {
-                    this.simulateClick();
+            sliders.forEach(id => {
+                const element = document.getElementById(id);
+                element.addEventListener('input', (e) => {
+                    updateSliderValue(id, e.target.value);
+                });
+            });
+
+            // 开关
+            document.getElementById('vibrateEnabled').addEventListener('change', (e) => {
+                config.vibrateEnabled = e.target.checked;
+                saveSettings();
+                addLog('info', `震动反馈${e.target.checked ? '启用' : '禁用'}`);
+                if (e.target.checked) {
+                    showToast('✅ 震动反馈已启用');
+                } else {
+                    showToast('🔇 震动反馈已禁用');
                 }
-                
-                if (this.isButtonPressed(buttons[1], 1)) {
-                    if (document.getElementById('appView').classList.contains('active')) {
-                        exitApp();
-                    }
+            });
+
+            document.getElementById('audioEnabled').addEventListener('change', (e) => {
+                config.audioEnabled = e.target.checked;
+                saveSettings();
+                addLog('info', `音频提示${e.target.checked ? '启用' : '禁用'}`);
+            });
+
+            document.getElementById('continuousMode').addEventListener('change', (e) => {
+                config.continuousMode = e.target.checked;
+                saveSettings();
+                addLog('info', `持续监控模式${e.target.checked ? '启用' : '禁用'}`);
+            });
+
+            document.getElementById('autoDimEnabled').addEventListener('change', (e) => {
+                config.autoDimEnabled = e.target.checked;
+                saveSettings();
+                if (!e.target.checked) {
+                    clearDimTimer();
+                    restoreBrightness();
+                } else if (isDetecting) {
+                    startDimTimer();
                 }
-                
-                if (this.isButtonPressed(buttons[2], 2)) {
-                    location.reload();
-                }
-                
-                if (this.isButtonPressed(buttons[7], 7)) {
-                    if (document.getElementById('appView').classList.contains('active')) {
-                        const startBtn = document.getElementById('startBtn');
-                        if (!startBtn.disabled) {
-                            startSession();
+                addLog('info', `自动变暗${e.target.checked ? '启用' : '禁用'}`);
+            });
+
+            document.getElementById('detectionArea').addEventListener('input', updateDetectionBox);
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabName);
+            });
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.dataset.tab === tabName);
+            });
+
+            addLog('info', `切换到${tabName}标签页`);
+        }
+
+        function updateSliderValue(id, value) {
+            const numValue = parseFloat(value);
+            config[id] = numValue;
+            
+            let displayValue = numValue;
+            let suffix = '';
+            
+            if (id.includes('Threshold') || id.includes('Level')) {
+                suffix = '%';
+            } else if (id.includes('Interval') || id.includes('Timeout')) {
+                suffix = '秒';
+                if (id === 'vibrateInterval') displayValue = numValue.toFixed(1);
+            } else if (id === 'volume') {
+                suffix = '%';
+            }
+            
+            document.getElementById(id + 'Value').textContent = displayValue + suffix;
+            
+            if (id === 'detectionArea') {
+                updateDetectionBox();
+            }
+            
+            if (isDetecting && id === 'frameRate') {
+                restartDetection();
+            }
+            
+            saveSettings();
+        }
+
+        function applyPreset(presetName) {
+            if (presetName === 'custom') {
+                document.getElementById('advancedSettings').classList.add('show');
+                addLog('info', '切换到自定义模式');
+            } else {
+                document.getElementById('advancedSettings').classList.remove('show');
+                const preset = presets[presetName];
+                if (preset) {
+                    Object.keys(preset).forEach(key => {
+                        config[key] = preset[key];
+                        const element = document.getElementById(key);
+                        if (element) {
+                            element.value = preset[key];
+                            updateSliderValue(key, preset[key]);
                         }
-                    }
-                }
-                
-                if (this.isButtonPressed(buttons[5], 5)) {
-                    if (document.getElementById('appView').classList.contains('active')) {
-                        if (session.isRunning) {
-                            stopSession();
-                        }
-                    }
-                }
-                
-                this.lastButtons = buttons.map(b => b.pressed);
-            },
-            
-            isButtonPressed(button, index) {
-                const pressed = button.pressed;
-                const wasPressed = this.lastButtons[index] || false;
-                return pressed && !wasPressed;
-            },
-            
-            simulateClick() {
-                const element = document.elementFromPoint(this.cursorX, this.cursorY);
-                if (element) {
-                    element.click();
+                    });
+                    addLog('success', `应用预设: ${presetName}模式`);
                 }
             }
-        };
-        
-        // ========== 秘密触发机制 ==========
-        let triggerClickCount = 0;
-        let stoneClickCount = 0;
-        let stoneVisible = false;
-        
-        document.getElementById('secretTrigger').addEventListener('click', function(e) {
-            e.stopPropagation();
-            triggerClickCount++;
-            
-            if (triggerClickCount >= 10) {
-                showStoneModal();
-                triggerClickCount = 0;
+            saveSettings();
+        }
+
+        // ============ 摄像头控制 ============
+        async function startCamera() {
+            try {
+                addLog('info', '正在请求摄像头权限...');
+                
+                const constraints = {
+                    video: {
+                        facingMode: currentCamera,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+                
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    updateDetectionBox();
+                    addLog('success', '摄像头启动成功', `分辨率: ${video.videoWidth}x${video.videoHeight}`);
+                };
+                
+                return true;
+            } catch (error) {
+                showToast('❌ 摄像头访问失败: ' + error.message);
+                addLog('error', '摄像头访问失败', error.message);
+                return false;
             }
-        });
-        
-        function showStoneModal() {
-            const modal = document.getElementById('stoneModal');
-            modal.classList.add('active');
+        }
+
+        function stopCamera() {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                addLog('info', '摄像头已关闭');
+            }
+        }
+
+        async function switchCamera() {
+            currentCamera = currentCamera === 'user' ? 'environment' : 'user';
+            addLog('info', `切换到${currentCamera === 'user' ? '前置' : '后置'}摄像头`);
+            
+            if (isDetecting) {
+                stopDetection();
+                await startCamera();
+                startDetection();
+            }
+        }
+
+        // ============ 运动检测 ============
+        async function toggleDetection() {
+            if (isDetecting) {
+                stopDetection();
+            } else {
+                await startDetection();
+            }
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            const pauseBtn = document.getElementById('pauseBtn');
+            
+            if (isPaused) {
+                pauseBtn.innerHTML = '<span>▶️</span><span>继续</span>';
+                document.getElementById('statusText').textContent = '已暂停';
+                document.getElementById('statusIcon').textContent = '⏸️';
+                addLog('warning', '检测已暂停');
+                showToast('⏸️ 检测已暂停');
+            } else {
+                pauseBtn.innerHTML = '<span>⏸️</span><span>暂停</span>';
+                document.getElementById('statusText').textContent = '运行中';
+                document.getElementById('statusIcon').textContent = '▶️';
+                addLog('success', '检测已继续');
+                showToast('▶️ 检测已继续');
+            }
+        }
+
+        async function startDetection() {
+            const cameraStarted = await startCamera();
+            if (!cameraStarted) return;
+            
+            isDetecting = true;
+            isPaused = false;
+            runningStartTime = Date.now();
+            
+            document.getElementById('startBtn').innerHTML = '<span>⏹️</span><span>停止检测</span>';
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('statusBadge').classList.add('active');
+            document.getElementById('statusText').textContent = '运行中';
+            document.getElementById('statusIcon').textContent = '▶️';
+            
+            await requestWakeLock();
+            
+            previousImageData = null;
+            const interval = 1000 / config.frameRate;
+            detectionInterval = setInterval(detectMotion, interval);
+            
+            runningTimeInterval = setInterval(updateRunningTime, 1000);
+            
+            if (config.autoDimEnabled) {
+                startDimTimer();
+            }
+            
+            addLog('success', '检测已启动', `帧率: ${config.frameRate}fps, 灵敏度: ${config.sensitivity}`);
+            showToast('✅ 检测已启动');
             
             setTimeout(() => {
-                modal.classList.remove('active');
-                showHiddenStone();
-            }, 2000);
+                if (isDetecting) {
+                    showToast('⚠️ 请勿锁屏,否则检测将暂停', 5000);
+                    addLog('warning', '锁屏提示', '请保持屏幕常亮以继续检测');
+                }
+            }, 5000);
         }
-        
-        function showHiddenStone() {
-            const stone = document.getElementById('hiddenStone');
-            stone.classList.add('visible');
-            stoneVisible = true;
-        }
-        
-        document.getElementById('hiddenStone').addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (!stoneVisible) return;
+
+        function stopDetection() {
+            isDetecting = false;
+            isPaused = false;
             
-            stoneClickCount++;
+            document.getElementById('startBtn').innerHTML = '<span>▶️</span><span>开始检测</span>';
+            document.getElementById('pauseBtn').innerHTML = '<span>⏸️</span><span>暂停</span>';
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('statusBadge').classList.remove('active');
+            document.getElementById('statusText').textContent = '已停止';
+            document.getElementById('statusIcon').textContent = '⏸️';
             
-            if (stoneClickCount >= 10) {
-                enterApp();
-                stoneClickCount = 0;
-                this.classList.remove('visible');
-                stoneVisible = false;
+            if (detectionInterval) {
+                clearInterval(detectionInterval);
+                detectionInterval = null;
             }
-        });
-        
-        // ========== 风景界面逻辑 ==========
-        function loadGallery() {
-            const gallery = document.getElementById('gallery');
-            gallery.innerHTML = '';
             
-            for (let i = 0; i < 12; i++) {
-                const randomId = Math.floor(Math.random() * 1000);
-                ImageLoadManager.createImageCardWithRetry(randomId, gallery);
+            if (runningTimeInterval) {
+                clearInterval(runningTimeInterval);
+                runningTimeInterval = null;
+            }
+            
+            releaseWakeLock();
+            stopCamera();
+            clearDimTimer();
+            restoreBrightness();
+            
+            document.getElementById('detectionBox').classList.remove('active');
+            document.getElementById('intensityText').textContent = '0%';
+            document.getElementById('intensityFill').style.width = '0%';
+            
+            const runTime = formatRunningTime(Date.now() - runningStartTime);
+            addLog('info', '检测已停止', `本次运行时长: ${runTime}`);
+            showToast('⏹️ 检测已停止');
+        }
+
+        function restartDetection() {
+            if (isDetecting) {
+                addLog('info', '重启检测中...');
+                stopDetection();
+                setTimeout(() => startDetection(), 100);
             }
         }
-        
-        function refreshGallery() {
-            loadGallery();
-        }
-        
-        function enterApp() {
-            document.getElementById('landscapeView').style.display = 'none';
-            document.getElementById('appView').classList.add('active');
-            document.body.classList.add('app-mode');
-            loadSettings();
-            loadSessionHistory();
-            displaySettingsHistory();
-        }
-        
-        function exitApp() {
-            document.getElementById('landscapeView').style.display = 'block';
-            document.getElementById('appView').classList.remove('active');
-            document.body.classList.remove('app-mode');
+
+        function detectMotion() {
+            if (!video.readyState === video.HAVE_ENOUGH_DATA || isPaused) return;
             
-            triggerClickCount = 0;
-            stoneClickCount = 0;
-            document.getElementById('hiddenStone').classList.remove('visible');
-            stoneVisible = false;
-        }
-        
-        window.addEventListener('DOMContentLoaded', () => {
-            loadGallery();
-            GamepadController.init();
-        });
-        
-        // ========== 功能界面完整代码 ==========
-        const StorageManager = {
-            KEYS: {
-                CURRENT_SETTINGS: 'pleasureAnalytics_currentSettings',
-                SETTINGS_HISTORY: 'pleasureAnalytics_settingsHistory',
-                SESSION_HISTORY: 'pleasureAnalytics_sessionHistory'
-            },
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            isAvailable() {
-                try {
-                    const test = '__storage_test__';
-                    localStorage.setItem(test, test);
-                    localStorage.removeItem(test);
-                    return true;
-                } catch(e) {
-                    return false;
-                }
-            },
+            const detectionSize = config.detectionArea / 100;
+            const detectionWidth = Math.floor(canvas.width * detectionSize);
+            const detectionHeight = Math.floor(canvas.height * detectionSize);
+            const startX = Math.floor((canvas.width - detectionWidth) / 2);
+            const startY = Math.floor((canvas.height - detectionHeight) / 2);
             
-            saveCurrentSettings(settings) {
-                if (!this.isAvailable()) return false;
-                try {
-                    localStorage.setItem(this.KEYS.CURRENT_SETTINGS, JSON.stringify(settings));
-                    return true;
-                } catch(e) {
-                    return false;
-                }
-            },
+            const currentImageData = ctx.getImageData(startX, startY, detectionWidth, detectionHeight);
             
-            loadCurrentSettings() {
-                if (!this.isAvailable()) return null;
-                try {
-                    const data = localStorage.getItem(this.KEYS.CURRENT_SETTINGS);
-                    return data ? JSON.parse(data) : null;
-                } catch(e) {
-                    return null;
-                }
-            },
-            
-            addToHistory(settings) {
-                if (!this.isAvailable()) return false;
-                try {
-                    let history = this.getSettingsHistory();
-                    const newEntry = {
-                        ...settings,
-                        timestamp: new Date().toISOString(),
-                        id: Date.now()
-                    };
-                    
-                    history.unshift(newEntry);
-                    
-                    if (history.length > 10) {
-                        history = history.slice(0, 10);
-                    }
-                    
-                    localStorage.setItem(this.KEYS.SETTINGS_HISTORY, JSON.stringify(history));
-                    return true;
-                } catch(e) {
-                    return false;
-                }
-            },
-            
-            getSettingsHistory() {
-                if (!this.isAvailable()) return [];
-                try {
-                    const data = localStorage.getItem(this.KEYS.SETTINGS_HISTORY);
-                    return data ? JSON.parse(data) : [];
-                } catch(e) {
-                    return [];
-                }
-            },
-            
-            deleteHistoryItem(id) {
-                if (!this.isAvailable()) return false;
-                try {
-                    let history = this.getSettingsHistory();
-                    history = history.filter(item => item.id !== id);
-                    localStorage.setItem(this.KEYS.SETTINGS_HISTORY, JSON.stringify(history));
-                    return true;
-                } catch(e) {
-                    return false;
-                }
-            },
-            
-            clearHistory() {
-                if (!this.isAvailable()) return false;
-                try {
-                    localStorage.removeItem(this.KEYS.SETTINGS_HISTORY);
-                    return true;
-                } catch(e) {
-                    return false;
-                }
-            },
-            
-            saveSessionHistory(history) {
-                if (!this.isAvailable()) return false;
-                try {
-                    localStorage.setItem(this.KEYS.SESSION_HISTORY, JSON.stringify(history));
-                    return true;
-                } catch(e) {
-                    return false;
-                }
-            },
-            
-            loadSessionHistory() {
-                if (!this.isAvailable()) return [];
-                try {
-                    const data = localStorage.getItem(this.KEYS.SESSION_HISTORY);
-                    return data ? JSON.parse(data) : [];
-                } catch(e) {
-                    return [];
-                }
-            }
-        };
-        
-        let config = {
-            length: 15,
-            diameter: 3,
-            useLube: false,
-            showMotivation: true,
-            totalCount: 10,
-            experience: 'intermediate',
-            actionDelay: 0,
-            safetyScore: 100,
-            originalDelay: 0
-        };
-        
-        let session = {
-            isRunning: false,
-            isPaused: false,
-            currentCycle: 0,
-            insertions: 0,
-            startTime: 0,
-            pauseTime: 0,
-            totalPauseTime: 0,
-            intervalId: null,
-            timerInterval: null,
-            motivationShown: 0
-        };
-        
-        let history = [];
-        
-        const EXP_MULTIPLIER = {
-            beginner: 1.5,
-            intermediate: 1.0,
-            advanced: 0.7,
-            expert: 0.5
-        };
-        
-        const MOTIVATION_MESSAGES = [
-            '💪 做得很好！继续保持温柔的节奏',
-            '🌟 你正在享受美好的时光，放松身心',
-            '✨ 注意呼吸，让身体自然放松',
-            '💖 感受每一次愉悦，享受当下',
-            '🎯 节奏很棒！继续保持这个状态',
-            '🌈 你做得非常好，身体正在适应',
-            '💫 放松肌肉，让一切自然流动',
-            '🦋 温柔而充满耐心，这很完美',
-            '🌸 你正在照顾好自己的身体',
-            '⭐ 继续保持，你做得很棒！'
-        ];
-        
-        function loadSettings() {
-            const saved = StorageManager.loadCurrentSettings();
-            if (saved) {
-                config = { ...config, ...saved };
+            if (previousImageData) {
+                const motionIntensity = compareFrames(currentImageData, previousImageData);
+                currentIntensity = motionIntensity;
                 
-                document.getElementById('toyLength').value = config.length;
-                document.getElementById('lengthSlider').value = config.length;
-                document.getElementById('toyDiameter').value = config.diameter;
-                document.getElementById('diameterSlider').value = config.diameter;
-                document.getElementById('totalCount').value = config.totalCount;
-                document.getElementById('experience').value = config.experience;
-                document.getElementById('useLube').checked = config.useLube;
-                document.getElementById('showMotivation').checked = config.showMotivation;
+                document.getElementById('intensityText').textContent = motionIntensity.toFixed(1) + '%';
+                document.getElementById('intensityFill').style.width = Math.min(motionIntensity, 100) + '%';
                 
-                toggleLube();
-                toggleMotivation();
-            }
-        }
-        
-        function saveSettings() {
-            config.length = parseFloat(document.getElementById('toyLength').value);
-            config.diameter = parseFloat(document.getElementById('toyDiameter').value);
-            config.totalCount = parseInt(document.getElementById('totalCount').value);
-            config.experience = document.getElementById('experience').value;
-            
-            StorageManager.saveCurrentSettings(config);
-        }
-        
-        function saveToHistory() {
-            const settingsSnapshot = {
-                length: config.length,
-                diameter: config.diameter,
-                totalCount: config.totalCount,
-                experience: config.experience,
-                useLube: config.useLube,
-                showMotivation: config.showMotivation
-            };
-            
-            StorageManager.addToHistory(settingsSnapshot);
-            displaySettingsHistory();
-            showLog('💾 当前设置已保存到历史记录', 'success');
-        }
-        
-        function displaySettingsHistory() {
-            const historyList = document.getElementById('historyList');
-            const historySection = document.getElementById('settingsHistory');
-            const settingsHistory = StorageManager.getSettingsHistory();
-            
-            if (settingsHistory.length === 0) {
-                historySection.classList.add('hidden');
-                return;
+                if (motionIntensity > config.sensitivity) {
+                    handleMotionDetected(motionIntensity);
+                } else {
+                    handleNoMotion();
+                }
             }
             
-            historySection.classList.remove('hidden');
-            historyList.innerHTML = '';
+            previousImageData = currentImageData;
+        }
+
+        function compareFrames(current, previous) {
+            const data1 = current.data;
+            const data2 = previous.data;
+            let diffPixels = 0;
+            const step = config.sampleStep * 4;
             
-            settingsHistory.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
+            for (let i = 0; i < data1.length; i += step) {
+                const diff = Math.abs(data1[i] - data2[i]) +
+                            Math.abs(data1[i+1] - data2[i+1]) +
+                            Math.abs(data1[i+2] - data2[i+2]);
                 
-                const date = new Date(item.timestamp);
-                const timeStr = date.toLocaleString('zh-CN', {
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                if (diff > config.pixelThreshold) {
+                    diffPixels++;
+                }
+            }
+            
+            const totalPixels = data1.length / (step * 3);
+            return (diffPixels / totalPixels) * 100;
+        }
+
+        function handleMotionDetected(intensity) {
+            const now = Date.now();
+            
+            if (!isInMotion) {
+                isInMotion = true;
+                motionStartTime = now;
+                addLog('info', '检测到运动', `强度: ${intensity.toFixed(1)}%`);
+            }
+            
+            const motionDuration = now - motionStartTime;
+            
+            if (motionDuration >= config.minDuration || config.continuousMode) {
+                stats.detections++;
+                document.getElementById('detectionCount').textContent = stats.detections;
+                document.getElementById('detectionBox').classList.add('active');
+                
+                if (intensity >= config.vibrateThreshold && 
+                    now - lastVibrateTime >= config.vibrateInterval * 1000) {
+                    triggerVibration();
+                    lastVibrateTime = now;
+                }
+                
+                if (intensity >= config.notificationThreshold && 
+                    now - lastNotificationTime >= config.notificationInterval * 1000) {
+                    sendNotification(intensity);
+                    lastNotificationTime = now;
+                }
+                
+                if (config.audioEnabled && intensity >= config.vibrateThreshold) {
+                    playBeep();
+                }
+            }
+        }
+
+        function handleNoMotion() {
+            if (isInMotion) {
+                isInMotion = false;
+                motionStartTime = 0;
+                document.getElementById('detectionBox').classList.remove('active');
+            }
+        }
+
+        // ============ 反馈功能 ============
+        function triggerVibration() {
+            if (!config.vibrateEnabled) return;
+            
+            if ('vibrate' in navigator) {
+                navigator.vibrate(200);
+                stats.vibrations++;
+                document.getElementById('vibrateCount').textContent = stats.vibrations;
+                addLog('success', '触发震动反馈');
+            }
+        }
+
+        async function sendNotification(intensity) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('🚨 检测到运动!', {
+                    body: `运动强度: ${intensity.toFixed(1)}%\n时间: ${new Date().toLocaleTimeString('zh-CN')}`,
+                    icon: '/icon.png',
+                    badge: '/badge.png',
+                    vibrate: [200, 100, 200]
                 });
                 
-                div.innerHTML = `
-                    <div>
-                        <div>${item.length}cm × ${item.diameter}cm | ${item.totalCount}次 | ${getExpText(item.experience)}</div>
-                        <div>
-                            ${item.useLube ? '💧' : '❌'} 
-                            ${item.showMotivation ? '💬' : '🔇'}
-                        </div>
-                        <div class="history-timestamp">${timeStr}</div>
-                    </div>
-                    <div class="history-actions">
-                        <button class="btn-mini btn-restore" onclick="restoreSettings(${item.id})">恢复</button>
-                        <button class="btn-mini btn-delete" onclick="deleteHistoryItem(${item.id})">删除</button>
-                    </div>
-                `;
-                
-                historyList.appendChild(div);
-            });
-        }
-        
-        function restoreSettings(id) {
-            const settingsHistory = StorageManager.getSettingsHistory();
-            const item = settingsHistory.find(s => s.id === id);
-            
-            if (item) {
-                config = { ...config, ...item };
-                
-                document.getElementById('toyLength').value = config.length;
-                document.getElementById('lengthSlider').value = config.length;
-                document.getElementById('toyDiameter').value = config.diameter;
-                document.getElementById('diameterSlider').value = config.diameter;
-                document.getElementById('totalCount').value = config.totalCount;
-                document.getElementById('experience').value = config.experience;
-                document.getElementById('useLube').checked = config.useLube;
-                document.getElementById('showMotivation').checked = config.showMotivation;
-                
-                toggleLube();
-                toggleMotivation();
-                
-                saveSettings();
-                showLog('🔄 设置已恢复', 'success');
+                stats.notifications++;
+                document.getElementById('notificationCount').textContent = stats.notifications;
+                addLog('success', '发送通知', `强度: ${intensity.toFixed(1)}%`);
             }
         }
-        
-        function deleteHistoryItem(id) {
-            if (confirm('确定要删除这条记录吗？')) {
-                StorageManager.deleteHistoryItem(id);
-                displaySettingsHistory();
-                showLog('🗑️ 记录已删除', 'info');
-            }
-        }
-        
-        function clearAllHistory() {
-            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
-                StorageManager.clearHistory();
-                displaySettingsHistory();
-                showLog('🗑️ 所有历史记录已清空', 'info');
-            }
-        }
-        
-        function loadSessionHistory() {
-            history = StorageManager.loadSessionHistory();
-            if (history.length > 0) {
-                updateHistoryChart();
-            }
-        }
-        
-        function saveSessionHistory() {
-            StorageManager.saveSessionHistory(history);
-        }
-        
-        function getExpText(exp) {
-            const texts = {
-                beginner: '初学',
-                intermediate: '中级',
-                advanced: '高级',
-                expert: '专家'
-            };
-            return texts[exp] || exp;
-        }
-        
-        document.getElementById('lengthSlider').addEventListener('input', (e) => {
-            document.getElementById('toyLength').value = e.target.value;
-            saveSettings();
-        });
-        
-        document.getElementById('toyLength').addEventListener('input', (e) => {
-            document.getElementById('lengthSlider').value = e.target.value;
-        });
-        
-        document.getElementById('diameterSlider').addEventListener('input', (e) => {
-            document.getElementById('toyDiameter').value = e.target.value;
-            saveSettings();
-        });
-        
-        document.getElementById('toyDiameter').addEventListener('input', (e) => {
-            document.getElementById('diameterSlider').value = e.target.value;
-        });
-        
-        function toggleLube() {
-            config.useLube = document.getElementById('useLube').checked;
-            const status = document.getElementById('lubeStatus');
-            const section = document.getElementById('lubeSection');
-            
-            if (config.useLube) {
-                status.textContent = '✅ 已使用润滑剂 - 摩擦力降低30%';
-                status.classList.add('enabled');
-                section.classList.add('active');
-            } else {
-                status.textContent = '未使用润滑剂';
-                status.classList.remove('enabled');
-                section.classList.remove('active');
+
+        function playBeep() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
             
-            saveSettings();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            const volume = config.volume / 100;
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
         }
-        
-        function toggleMotivation() {
-            config.showMotivation = document.getElementById('showMotivation').checked;
-            const status = document.getElementById('motivationStatus');
-            const section = document.getElementById('tipsSection');
-            
-            if (config.showMotivation) {
-                status.textContent = '已开启 - 会显示鼓励提示';
-                status.classList.add('enabled');
-                section.classList.add('active');
-            } else {
-                status.textContent = '已关闭';
-                status.classList.remove('enabled');
-                section.classList.remove('active');
-            }
-            
-            saveSettings();
-        }
-        
-        function calculateParams() {
-            config.length = parseFloat(document.getElementById('toyLength').value);
-            config.diameter = parseFloat(document.getElementById('toyDiameter').value);
-            config.totalCount = parseInt(document.getElementById('totalCount').value);
-            config.experience = document.getElementById('experience').value;
-            
-            if (config.length < 1 || config.length > 150) {
-                showLog('❌ 长度必须在 1-150cm 之间', 'info');
-                return;
-            }
-            
-            if (config.diameter < 0.5 || config.diameter > 10) {
-                showLog('❌ 直径必须在 0.5-10cm 之间', 'info');
-                return;
-            }
-            
-            if (config.totalCount % 2 !== 0) {
-                config.totalCount++;
-                document.getElementById('totalCount').value = config.totalCount;
-            }
-            
-            const expMultiplier = EXP_MULTIPLIER[config.experience];
-            
-            let baseDelay = (config.length / 30) + (config.diameter / 3) + 1.2;
-            baseDelay *= expMultiplier;
-            config.originalDelay = baseDelay;
-            
-            if (config.useLube) {
-                config.actionDelay = baseDelay * 0.70;
-                showLog('💧 润滑剂效果: 速度提升 30%', 'success');
-            } else {
-                config.actionDelay = baseDelay;
-            }
-            
-            let safetyScore = 100;
-            
-            if (config.length > 100) safetyScore -= 20;
-            else if (config.length > 50) safetyScore -= 10;
-            
-            if (config.diameter > 6) safetyScore -= 25;
-            else if (config.diameter > 4) safetyScore -= 15;
-            else if (config.diameter > 3) safetyScore -= 5;
-            
-            if (config.experience === 'beginner' && config.diameter > 4) safetyScore -= 10;
-            
-            if (config.useLube) {
-                safetyScore += 20;
-            } else {
-                safetyScore -= 25;
-            }
-            
-            config.safetyScore = Math.max(0, Math.min(100, safetyScore));
-            
-            displayCalculationResults();
-            displaySafetyAlert();
-            saveToHistory();
-            
-            document.getElementById('startBtn').disabled = false;
-            showLog(`✅ 计算完成 - 频率: ${config.actionDelay.toFixed(2)}秒/次`, 'success');
-        }
-        
-        function displayCalculationResults() {
-            const totalTime = (config.totalCount * config.actionDelay / 60).toFixed(1);
-            
-            let html = `
-                <div class="calculation-result">
-                    <h3 style="color: #319795; margin-bottom: 15px;">📋 计算结果</h3>
-                    <div class="result-item">
-                        <span>动作频率:</span>
-                        <span class="result-value">${config.actionDelay.toFixed(2)} 秒/次</span>
-                    </div>
-                    <div class="result-item">
-                        <span>预计总时长:</span>
-                        <span class="result-value">${totalTime} 分钟</span>
-                    </div>
-                    <div class="result-item">
-                        <span>插入次数:</span>
-                        <span class="result-value">${config.totalCount / 2} 次</span>
-                    </div>
-                    <div class="result-item">
-                        <span>安全评分:</span>
-                        <span class="result-value" style="color: ${getSafetyColor()}">${config.safetyScore}/100</span>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('calculationResult').innerHTML = html;
-            document.getElementById('calculationResult').classList.remove('hidden');
-        }
-        
-        function getSafetyColor() {
-            if (config.safetyScore >= 80) return '#48bb78';
-            if (config.safetyScore >= 60) return '#ecc94b';
-            if (config.safetyScore >= 40) return '#ed8936';
-            return '#f56565';
-        }
-        
-        function getSafetyLevel() {
-            if (config.safetyScore >= 80) return 'high';
-            if (config.safetyScore >= 50) return 'medium';
-            return 'low';
-        }
-        
-        function displaySafetyAlert() {
-            const level = getSafetyLevel();
-            let icon = '✅';
-            let title = '安全等级: 优秀';
-            let message = '当前配置非常安全。';
-            
-            if (level === 'medium') {
-                icon = '⚠️';
-                title = '安全等级: 中等';
-                message = '建议使用润滑剂，缓慢进行。';
-            } else if (level === 'low') {
-                icon = '🚨';
-                title = '安全等级: 较低';
-                message = '强烈建议使用润滑剂！请极度缓慢进行。';
-            }
-            
-            const html = `
-                <div class="safety-alert ${level}">
-                    <span class="safety-icon">${icon}</span>
-                    <div>
-                        <strong>${title}</strong><br>
-                        ${message}
-                    </div>
-                </div>
-            `;
-            document.getElementById('safetyAlert').innerHTML = html;
-            document.getElementById('safetyAlert').classList.remove('hidden');
-        }
-        
-        async function startSession() {
-            if (config.actionDelay === 0) {
-                showLog('❌ 请先进行智能计算', 'info');
-                return;
-            }
-            
-            session = {
-                isRunning: true,
-                isPaused: false,
-                currentCycle: 0,
-                insertions: 0,
-                startTime: performance.now(),
-                pauseTime: 0,
-                totalPauseTime: 0,
-                intervalId: null,
-                timerInterval: null,
-                motivationShown: 0
-            };
-            
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('controlButtons').classList.remove('hidden');
-            document.getElementById('healthReport').classList.add('hidden');
-            
-            clearLog();
-            showLog('🚀 会话开始！', 'success');
-            
-            startTimer();
-            runSession();
-        }
-        
-        async function runSession() {
-            while (session.currentCycle < config.totalCount && session.isRunning) {
-                if (session.isPaused) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    continue;
+
+        // ============ 电源管理 ============
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLock.addEventListener('release', () => {
+                        addLog('warning', 'Wake Lock已释放');
+                    });
+                    addLog('success', 'Wake Lock已激活', '屏幕将保持常亮');
                 }
-                
-                session.currentCycle++;
-                
-                if (session.currentCycle % 2 === 1) {
-                    session.insertions++;
-                    const lubeText = config.useLube ? ' [润滑顺畅]' : '';
-                    showLog(`♥ ➤➤➤ 第 ${session.insertions} 次插入${lubeText}`, 'insert');
-                    
-                    if (config.showMotivation && session.insertions % 3 === 0) {
-                        const randomMsg = MOTIVATION_MESSAGES[Math.floor(Math.random() * MOTIVATION_MESSAGES.length)];
-                        await sleep(1000);
-                        showLog(randomMsg, 'motivation');
+            } catch (err) {
+                addLog('error', 'Wake Lock请求失败', err.message);
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        function startDimTimer() {
+            clearDimTimer();
+            dimTimer = setTimeout(() => {
+                if (isDetecting && !isDimmed) {
+                    dimScreen();
+                }
+            }, config.dimTimeout * 1000);
+        }
+
+        function clearDimTimer() {
+            if (dimTimer) {
+                clearTimeout(dimTimer);
+                dimTimer = null;
+            }
+        }
+
+        function dimScreen() {
+            const overlay = document.getElementById('dimOverlay');
+            overlay.style.opacity = config.dimLevel / 100;
+            overlay.style.display = 'block';
+            isDimmed = true;
+            addLog('info', '进入省电模式', `亮度降低 ${config.dimLevel}%`);
+            showToast('💤 已进入省电模式', 3000);
+        }
+
+        function restoreBrightness() {
+            const overlay = document.getElementById('dimOverlay');
+            overlay.style.display = 'none';
+            isDimmed = false;
+        }
+
+        function initUserActivityTracking() {
+            const events = ['touchstart', 'touchmove', 'touchend', 'click', 'scroll'];
+            
+            events.forEach(event => {
+                document.addEventListener(event, () => {
+                    if (isDimmed) {
+                        restoreBrightness();
+                        addLog('info', '恢复正常亮度', '检测到用户活动');
                     }
-                } else {
-                    showLog(`♥ ⟵⟵⟵ 完全拔出`, 'withdraw');
-                }
-                
-                updateStats();
-                await sleep(config.actionDelay * 1000);
-            }
-            
-            if (session.isRunning) {
-                completeSession();
-            }
+                    
+                    if (isDetecting && config.autoDimEnabled) {
+                        startDimTimer();
+                    }
+                }, { passive: true });
+            });
         }
-        
-        function pauseSession() {
-            session.isPaused = !session.isPaused;
-            const pauseBtn = document.getElementById('pauseText');
-            
-            if (session.isPaused) {
-                session.pauseTime = performance.now();
-                pauseBtn.textContent = '继续';
-                showLog('⏸️ 会话已暂停', 'info');
+
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                if (isDetecting) {
+                    addLog('warning', '页面已隐藏', '检测可能暂停');
+                }
+                clearDimTimer();
             } else {
-                session.totalPauseTime += performance.now() - session.pauseTime;
-                pauseBtn.textContent = '暂停';
-                showLog('▶️ 会话继续...', 'info');
+                addLog('info', '页面已显示');
+                if (isDetecting && config.autoDimEnabled) {
+                    startDimTimer();
+                }
             }
         }
-        
-        function stopSession() {
-            session.isRunning = false;
-            clearInterval(session.timerInterval);
-            document.getElementById('controlButtons').classList.add('hidden');
-            document.getElementById('startBtn').disabled = false;
-            showLog('⏹️ 会话已停止', 'info');
-            updateStats();
-        }
-        
-        function completeSession() {
-            session.isRunning = false;
-            clearInterval(session.timerInterval);
-            
-            const duration = Math.floor((performance.now() - session.startTime - session.totalPauseTime) / 1000);
-            
-            showCelebration();
-            showLog(`🎉 会话完成！`, 'success');
-            showLog(`📊 总计 ${session.insertions} 次插入，用时 ${formatTime(duration)}`, 'success');
-            
-            history.push({
-                date: new Date().toLocaleString('zh-CN'),
-                insertions: session.insertions,
-                duration: duration,
-                usedLube: config.useLube
-            });
-            
-            saveSessionHistory();
-            updateHistoryChart();
-            displayHealthReport();
-            
-            document.getElementById('controlButtons').classList.add('hidden');
-            document.getElementById('startBtn').disabled = false;
-        }
-        
-        function displayHealthReport() {
-            const html = `
-                <div class="health-report">
-                    <h3>🏥 会话后健康检查</h3>
+
+        // ============ 电池监控 ============
+        async function initBatteryMonitor() {
+            try {
+                if ('getBattery' in navigator) {
+                    const battery = await navigator.getBattery();
+                    updateBatteryInfo(battery);
                     
-                    <div class="health-item">
-                        <strong>肛门观察：</strong>
-                        ${config.useLube ? '使用了润滑剂，应该较为湿润。' : '⚠️ 未使用润滑剂，需仔细检查。'}
-                    </div>
+                    battery.addEventListener('levelchange', () => updateBatteryInfo(battery));
+                    battery.addEventListener('chargingchange', () => updateBatteryInfo(battery));
+                    battery.addEventListener('chargingtimechange', () => updateBatteryInfo(battery));
+                    battery.addEventListener('dischargingtimechange', () => updateBatteryInfo(battery));
                     
-                    <div class="health-item">
-                        <strong>出血检查：</strong>
-                        少量血丝属于正常。如出血量较多请立即停止并咨询医生。
-                    </div>
-                    
-                    <div class="health-item">
-                        <strong>肠液分泌：</strong>
-                        适量肠液分泌是正常的生理反应。
-                    </div>
-                    
-                    <div class="care-tips">
-                        <h4>💡 护理与清洁建议</h4>
-                        <ul>
-                            <li>用温水轻柔清洗肛门周围</li>
-                            <li>避免使用刺激性清洁剂</li>
-                            <li>玩具使用后立即清洗消毒</li>
-                            <li>建议休息24-48小时</li>
-                            <li>如有持续疼痛请咨询医生</li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('healthReport').innerHTML = html;
-            document.getElementById('healthReport').classList.remove('hidden');
-        }
-        
-        function showCelebration() {
-            const celebration = document.createElement('div');
-            celebration.className = 'celebration';
-            celebration.textContent = '🎉';
-            document.body.appendChild(celebration);
-            setTimeout(() => celebration.remove(), 1000);
-        }
-        
-        function startTimer() {
-            session.timerInterval = setInterval(() => {
-                if (!session.isPaused && session.isRunning) {
-                    const elapsed = Math.floor((performance.now() - session.startTime - session.totalPauseTime) / 1000);
-                    document.getElementById('timer').textContent = formatTime(elapsed);
-                }
-            }, 1000);
-        }
-        
-        function updateStats() {
-            const progressPercent = (session.currentCycle / config.totalCount * 100).toFixed(1);
-            document.getElementById('progress').textContent = progressPercent + '%';
-            document.getElementById('progressBar').style.width = progressPercent + '%';
-            document.getElementById('insertCount').textContent = session.insertions;
-            
-            const remaining = (config.totalCount - session.currentCycle) * config.actionDelay;
-            const mins = Math.floor(remaining / 60);
-            const secs = Math.floor(remaining % 60);
-            document.getElementById('remaining').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-        
-        function updateHistoryChart() {
-            const chartContainer = document.getElementById('historyChart');
-            chartContainer.innerHTML = '';
-            
-            if (history.length === 0) return;
-            
-            const maxInsertions = Math.max(...history.map(h => h.insertions));
-            const recentHistory = history.slice(-10);
-            
-            recentHistory.forEach((h, i) => {
-                const bar = document.createElement('div');
-                bar.className = 'chart-bar';
-                const height = (h.insertions / maxInsertions) * 100;
-                bar.style.height = height + '%';
-                
-                if (h.usedLube) {
-                    bar.style.background = 'linear-gradient(to top, #48bb78, #38a169)';
+                    addLog('success', '电池监控已启动');
                 } else {
-                    bar.style.background = 'linear-gradient(to top, #fc8181, #f56565)';
+                    document.getElementById('batteryPercent').textContent = 'N/A';
+                    document.getElementById('batteryCharging').textContent = '不支持电池API';
+                    addLog('warning', '设备不支持电池API');
+                }
+            } catch (error) {
+                addLog('error', '电池API初始化失败', error.message);
+            }
+        }
+
+        function updateBatteryInfo(battery) {
+            const level = Math.round(battery.level * 100);
+            
+            document.getElementById('batteryPercent').textContent = level + '%';
+            document.getElementById('batteryStatus').textContent = level + '%';
+            document.getElementById('batteryFill').style.width = level + '%';
+            
+            let icon = '🔋';
+            if (battery.charging) {
+                icon = '⚡';
+            } else if (level <= 20) {
+                icon = '🪫';
+            }
+            document.getElementById('batteryIcon').textContent = icon;
+            document.getElementById('batteryIconLarge').textContent = icon;
+            
+            if (battery.charging) {
+                document.getElementById('batteryCharging').textContent = '⚡ 充电中';
+                document.getElementById('batteryFill').classList.remove('low');
+                
+                recordBatteryLevel(level, true);
+                const chargeSpeed = calculateChargeSpeed();
+                
+                if (chargeSpeed > 0) {
+                    const remainingPercent = 100 - level;
+                    const hoursToFull = remainingPercent / chargeSpeed;
+                    document.getElementById('batteryTime').textContent = 
+                        `预计 ${formatTime(hoursToFull)} 充满`;
+                } else if (battery.chargingTime && battery.chargingTime !== Infinity) {
+                    document.getElementById('batteryTime').textContent = 
+                        `预计 ${formatTime(battery.chargingTime / 3600)} 充满`;
+                } else {
+                    document.getElementById('batteryTime').textContent = '计算中...';
+                }
+            } else {
+                document.getElementById('batteryCharging').textContent = '🔋 未充电';
+                
+                if (level <= 20) {
+                    document.getElementById('batteryFill').classList.add('low');
+                    if (level <= 10 && isDetecting) {
+                        addLog('warning', '电量严重不足', `当前电量: ${level}%`);
+                    }
                 }
                 
-                bar.title = `${h.date}\n${h.insertions} 次\n${formatTime(h.duration)}\n${h.usedLube ? '✅ 润滑' : '❌ 无润滑'}`;
-                chartContainer.appendChild(bar);
-            });
+                if (battery.dischargingTime && battery.dischargingTime !== Infinity) {
+                    document.getElementById('batteryTime').textContent = 
+                        `可用 ${formatTime(battery.dischargingTime / 3600)}`;
+                } else {
+                    document.getElementById('batteryTime').textContent = '计算剩余时间...';
+                }
+            }
         }
-        
-        function showLog(message, type = 'info') {
-            const log = document.getElementById('logContainer');
-            const entry = document.createElement('div');
-            const icons = {
-                insert: '💗',
-                withdraw: '💙',
-                info: 'ℹ️',
-                success: '✅',
-                motivation: '💬'
-            };
+
+        function recordBatteryLevel(level, charging) {
+            const now = Date.now();
+            batteryChargeHistory.push({ level, time: now, charging });
             
-            entry.className = `log-entry log-${type}`;
-            entry.innerHTML = `
-                <span class="log-icon">${icons[type] || 'ℹ️'}</span>
-                <span>${new Date().toLocaleTimeString('zh-CN')} - ${message}</span>
-            `;
+            const fiveMinutesAgo = now - 5 * 60 * 1000;
+            batteryChargeHistory = batteryChargeHistory.filter(record => record.time > fiveMinutesAgo);
+        }
+
+        function calculateChargeSpeed() {
+            if (batteryChargeHistory.length < 2) return 0;
             
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
+            const first = batteryChargeHistory[0];
+            const last = batteryChargeHistory[batteryChargeHistory.length - 1];
+            
+            const timeDiff = (last.time - first.time) / 1000 / 3600;
+            const levelDiff = last.level - first.level;
+            
+            if (timeDiff > 0 && levelDiff > 0) {
+                return levelDiff / timeDiff;
+            }
+            
+            return 0;
         }
-        
-        function clearLog() {
-            document.getElementById('logContainer').innerHTML = '';
+
+        function formatTime(hours) {
+            if (hours < 1) {
+                return `${Math.round(hours * 60)} 分钟`;
+            } else {
+                const h = Math.floor(hours);
+                const m = Math.round((hours - h) * 60);
+                return m > 0 ? `${h} 小时 ${m} 分钟` : `${h} 小时`;
+            }
         }
-        
-        function formatTime(seconds) {
-            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            return `${h}:${m}:${s}`;
+
+        // ============ 运行时间 ============
+        function updateRunningTime() {
+            if (!runningStartTime) return;
+            
+            const elapsed = Date.now() - runningStartTime;
+            const formatted = formatRunningTime(elapsed);
+            document.getElementById('runningTime').textContent = formatted;
         }
-        
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
+
+        function formatRunningTime(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
-/* === 🚀 究极性能与防泄漏补丁 v2.0 === */
-(function() {
-    console.log("⚡ 究极优化补丁已注入...");
 
-    // 1. 【Blob 对象监控】防止下载图片产生的临时文件堆积内存
-    const activeObjectUrls = new Set();
-    const originalCreateObjectURL = window.URL.createObjectURL;
-    const originalRevokeObjectURL = window.URL.revokeObjectURL;
-
-    if (originalCreateObjectURL && originalRevokeObjectURL) {
-        window.URL.createObjectURL = function(blob) {
-            const url = originalCreateObjectURL.call(window.URL, blob);
-            activeObjectUrls.add(url);
-            return url;
-        };
-
-        window.URL.revokeObjectURL = function(url) {
-            originalRevokeObjectURL.call(window.URL, url);
-            activeObjectUrls.delete(url);
-        };
-    }
-
-    // 2. 【智能日志截断】批量删除节点，减少浏览器重绘次数
-    const originalShowLog = window.showLog;
-    if (typeof originalShowLog === 'function') {
-        window.showLog = function(message, type) {
-            const logContainer = document.getElementById('logContainer');
-            // 当日志超过 60 条时，一次性删掉前 20 条（比每条删一次更省性能）
-            if (logContainer && logContainer.childNodes.length > 60) {
-                while (logContainer.childNodes.length > 40) {
-                    logContainer.removeChild(logContainer.firstChild);
-                }
-            }
-            originalShowLog(message, type);
-        };
-    }
-
-    // 3. 【暴力清理协议】退出时执行“焦土政策”
-    const originalExitApp = window.exitApp;
-    if (typeof originalExitApp === 'function') {
-        window.exitApp = function() {
-            console.log("🧹 执行深度清理...");
-
-            // A. 停止业务逻辑
-            if (window.session) {
-                if (window.session.isRunning && typeof window.stopSession === 'function') {
-                    window.stopSession();
-                }
-                // 暴力清除所有已知定时器 ID
-                clearInterval(window.session.timerInterval);
-                clearInterval(window.session.intervalId);
-            }
-
-            // B. 强制停止手柄轮询 (极其重要，省 CPU)
-            if (window.GamepadController && window.GamepadController.updateInterval) {
-                clearInterval(window.GamepadController.updateInterval);
-                window.GamepadController.updateInterval = null;
-                console.log("🎮 手柄轮询已强制挂起");
-            }
-
-            // C. 释放所有未回收的 Blob URL (防止下载图片导致的内存泄漏)
-            if (activeObjectUrls.size > 0) {
-                console.log(`🗑️ 释放了 ${activeObjectUrls.size} 个残留对象链接`);
-                for (const url of activeObjectUrls) {
-                    originalRevokeObjectURL.call(window.URL, url);
-                }
-                activeObjectUrls.clear();
-            }
-
-            // D. 清理重试队列
-            if (window.ImageLoadManager && window.ImageLoadManager.retryingImages) {
-                window.ImageLoadManager.retryingImages.clear();
-            }
-
-            // E. 强制垃圾回收诱导 (清空重数据变量)
-            if (window.history && window.history.length > 500) {
-                 // 注意：这里是指浏览器会话历史，通常无法修改，此处仅为示例逻辑，
-                 // 实际上我们可以清空应用内的 history 数组
-                 if (Array.isArray(window.historyList)) { // 假设你代码里存记录的数组叫这个
-                     window.historyList = []; 
-                 }
-            }
-
-            // 执行原路返回
-            originalExitApp();
-        };
-    }
-
-    // 4. 【手柄唤醒】进入 App 时记得把手柄检测重新开起来
-    const originalEnterApp = window.enterApp;
-    if (typeof originalEnterApp === 'function') {
-        window.enterApp = function() {
-            if (window.GamepadController) {
-                // 重新启动手柄轮询
-                window.GamepadController.startUpdate();
-            }
-            originalEnterApp();
+        // ============ UI 更新 ============
+        function updateDetectionBox() {
+            const box = document.getElementById('detectionBox');
+            const size = config.detectionArea;
+            box.style.width = size + '%';
+            box.style.height = size + '%';
+            box.style.left = ((100 - size) / 2) + '%';
+            box.style.top = ((100 - size) / 2) + '%';
         }
-    }
 
-})();
+        // ============ 统计功能 ============
+        function resetStats() {
+            if (confirm('确定要重置所有统计数据吗?')) {
+                stats = {
+                    detections: 0,
+                    vibrations: 0,
+                    notifications: 0
+                };
+                
+                document.getElementById('detectionCount').textContent = '0';
+                document.getElementById('vibrateCount').textContent = '0';
+                document.getElementById('notificationCount').textContent = '0';
+                document.getElementById('runningTime').textContent = '00:00:00';
+                
+                runningStartTime = null;
+                
+                addLog('warning', '统计数据已重置');
+                showToast('🔄 统计数据已重置');
+                saveSettings();
+            }
+        }
+
+        // ============ 通知权限 ============
+        async function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                setTimeout(async () => {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        showToast('✅ 通知权限已授予');
+                        addLog('success', '通知权限已授予');
+                    } else {
+                        addLog('warning', '通知权限被拒绝');
+                    }
+                }, 2000);
+            }
+        }
+
+        // ============ 设备检测 ============
+        function checkDeviceType() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (!isMobile) {
+                document.querySelector('.desktop-warning').style.display = 'flex';
+                addLog('error', '检测到PC端访问', '本应用仅支持移动设备');
+            } else {
+                addLog('info', '设备类型检测通过', navigator.userAgent);
+            }
+        }
+
+        // ============ 提示信息 ============
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        function showWelcomeToast() {
+            setTimeout(() => {
+                showToast('👋 欢迎使用智能运动检测系统 Pro', 5000);
+            }, 500);
+        }
+
+        // ============ 设置持久化 ============
+        function saveSettings() {
+            localStorage.setItem('motionDetectorConfig', JSON.stringify(config));
+            localStorage.setItem('motionDetectorStats', JSON.stringify(stats));
+        }
+
+        function loadSettings() {
+            const savedConfig = localStorage.getItem('motionDetectorConfig');
+            const savedStats = localStorage.getItem('motionDetectorStats');
+            
+            if (savedConfig) {
+                config = { ...config, ...JSON.parse(savedConfig) };
+                
+                Object.keys(config).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        if (element.type === 'checkbox') {
+                            element.checked = config[key];
+                        } else if (element.type === 'range') {
+                            element.value = config[key];
+                            updateSliderValue(key, config[key]);
+                        }
+                    }
+                });
+                
+                addLog('info', '配置已加载', '从本地存储恢复设置');
+            }
+            
+            if (savedStats) {
+                stats = JSON.parse(savedStats);
+                document.getElementById('detectionCount').textContent = stats.detections;
+                document.getElementById('vibrateCount').textContent = stats.vibrations;
+                document.getElementById('notificationCount').textContent = stats.notifications;
+            }
+            
+            updateDetectionBox();
+        }
 <script>
 (function() {
     console.log("🐒 正在加载智能运动检测系统增强补丁...");

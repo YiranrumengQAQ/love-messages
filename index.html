@@ -2650,6 +2650,250 @@
     }
 
 })();
-    </script>
+<script>
+(function() {
+    console.log("🐒 正在加载智能运动检测系统增强补丁...");
+
+    // ==========================================
+    // 1. 安全修复: 防止 XSS 攻击 (Log System)
+    // ==========================================
+    const originalAddLog = window.addLog;
+    
+    // HTML 转义工具
+    const escapeHTML = (str) => {
+        if (typeof str !== 'string') return str;
+        return str.replace(/[&<>'"]/g, 
+            tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag]));
+    };
+
+    // 劫持 addLog 函数
+    window.addLog = function(level, message, detail = '') {
+        // 在存入 logs 数组前清洗数据，彻底阻断 HTML 注入
+        const safeMessage = escapeHTML(message);
+        const safeDetail = escapeHTML(detail);
+        return originalAddLog.call(this, level, safeMessage, safeDetail);
+    };
+
+    // ==========================================
+    // 2. 稳定性修复: 资源清理与内存保护
+    // ==========================================
+    const originalStart = window.startDetection;
+    const originalStop = window.stopDetection;
+
+    window.stopDetection = function() {
+        // 执行原函数
+        originalStop.call(this);
+        
+        // 增强清理：确保所有轨道完全停止，防止某些移动端浏览器即使 srcObject=null 仍占用相机
+        if (window.video && window.video.srcObject) {
+            const tracks = window.video.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+            window.video.srcObject = null;
+        }
+        
+        // 强制垃圾回收建议 (解除大对象引用)
+        window.previousImageData = null;
+    };
+
+    // ==========================================
+    // 3. 游戏手柄控制系统 (Gamepad System)
+    // ==========================================
+    
+    // 样式注入
+    const style = document.createElement('style');
+    style.innerHTML = `
+        #gamepad-cursor {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+            display: none;
+            transition: opacity 0.2s;
+            mix-blend-mode: hard-light;
+        }
+        #gamepad-cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: var(--danger-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #gamepad-cursor.active {
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--primary-color);
+            border-color: white;
+        }
+        /* 点击波纹特效 */
+        .cursor-ripple {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.4);
+            transform: scale(0);
+            animation: ripple 0.5s ease-out;
+            pointer-events: none;
+            z-index: 99998;
+        }
+        @keyframes ripple {
+            to { transform: scale(3); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // 创建光标元素
+    const cursor = document.createElement('div');
+    cursor.id = 'gamepad-cursor';
+    document.body.appendChild(cursor);
+
+    // 状态变量
+    let cursorX = window.innerWidth / 2;
+    let cursorY = window.innerHeight / 2;
+    let isCursorVisible = false;
+    let lastAF = null;
+    let lastButtonState = false; // A键状态
+    
+    // 配置
+    const DEAD_ZONE = 0.15;
+    const CURSOR_SPEED = 12;
+    const SCROLL_SPEED = 15;
+
+    // 辅助：模拟点击事件
+    function simulateClick(x, y) {
+        // 创建波纹
+        const ripple = document.createElement('div');
+        ripple.className = 'cursor-ripple';
+        ripple.style.left = (x - 25) + 'px';
+        ripple.style.top = (y - 25) + 'px';
+        ripple.style.width = '50px';
+        ripple.style.height = '50px';
+        document.body.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 550);
+
+        // 获取目标元素
+        const element = document.elementFromPoint(x, y);
+        if (element) {
+            // 优先触发 click
+            element.click();
+            
+            // 针对 range input (滑块) 的特殊处理
+            if (element.tagName === 'INPUT' && element.type === 'range') {
+                element.focus();
+                // 尝试触发 input 事件更新滑块 UI
+                // 注意：由于安全限制，完全模拟拖拽很难，这里仅做点击触发
+                element.dispatchEvent(new Event('input', { bubbles: true }));
+                element.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+    }
+
+    // 核心循环
+    function gameLoop() {
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+        const gp = gamepads[0] || gamepads[1] || gamepads[2] || gamepads[3]; // 遍历寻找任意连接的手柄
+
+        if (gp) {
+            // 1. 处理光标显隐：只有动了才显示
+            const hasInput = Math.abs(gp.axes[0]) > DEAD_ZONE || Math.abs(gp.axes[1]) > DEAD_ZONE || gp.buttons.some(b => b.pressed);
+            
+            if (!isCursorVisible && hasInput) {
+                isCursorVisible = true;
+                cursor.style.display = 'block';
+                // 初始位置重置到屏幕中心
+                cursorX = window.innerWidth / 2;
+                cursorY = window.innerHeight / 2;
+            }
+
+            if (isCursorVisible) {
+                // 2. 左摇杆控制光标移动 (Axes 0, 1)
+                const axisX = gp.axes[0];
+                const axisY = gp.axes[1];
+
+                if (Math.abs(axisX) > DEAD_ZONE) cursorX += axisX * CURSOR_SPEED;
+                if (Math.abs(axisY) > DEAD_ZONE) cursorY += axisY * CURSOR_SPEED;
+
+                // 边界限制
+                cursorX = Math.max(0, Math.min(window.innerWidth, cursorX));
+                cursorY = Math.max(0, Math.min(window.innerHeight, cursorY));
+
+                // 更新视觉
+                cursor.style.left = cursorX + 'px';
+                cursor.style.top = cursorY + 'px';
+
+                // 3. A键点击 (Button 0 - Xbox A / PS X)
+                const btnA = gp.buttons[0];
+                if (btnA.pressed && !lastButtonState) {
+                    cursor.classList.add('active');
+                    simulateClick(cursorX, cursorY);
+                } else if (!btnA.pressed && lastButtonState) {
+                    cursor.classList.remove('active');
+                }
+                lastButtonState = btnA.pressed;
+
+                // 4. RT 缓慢向上翻页 (Button 7 / Axis)
+                // Xbox: RT is Button 7 (Analog). PS: R2 is Button 7.
+                const btnRT = gp.buttons[7];
+                const rtValue = (typeof btnRT === 'object') ? btnRT.value : btnRT;
+                
+                if (btnRT && (btnRT.pressed || rtValue > 0.1)) {
+                    window.scrollBy({
+                        top: -SCROLL_SPEED * (rtValue || 0.5),
+                        behavior: 'auto'
+                    });
+                }
+
+                // 5. RB 缓慢往下翻页 (Button 5 - RB / R1)
+                const btnRB = gp.buttons[5];
+                if (btnRB && btnRB.pressed) {
+                    window.scrollBy({
+                        top: SCROLL_SPEED,
+                        behavior: 'auto'
+                    });
+                }
+            }
+        }
+
+        lastAF = requestAnimationFrame(gameLoop);
+    }
+
+    // 启动监听
+    window.addEventListener("gamepadconnected", (e) => {
+        addLog('success', '外部设备已连接', `检测到游戏手柄: ${e.gamepad.id}`);
+        showToast('🎮 手柄已连接');
+        // 确保循环只启动一次
+        if (!lastAF) gameLoop();
+    });
+
+    window.addEventListener("gamepaddisconnected", (e) => {
+        addLog('warning', '外部设备断开', '游戏手柄连接丢失');
+        showToast('🚫 手柄已断开');
+        // 可选：断开后隐藏光标
+        cursor.style.display = 'none';
+        isCursorVisible = false;
+    });
+
+    // 页面加载时若已有手柄连接，直接启动
+    if (navigator.getGamepads && (navigator.getGamepads()[0] || navigator.getGamepads()[1])) {
+        gameLoop();
+    }
+
+})();
+</script>
 </body>
 </html>

@@ -268,3 +268,82 @@
 
 </body>
 </html>
+<style>
+    /* 今日高亮补丁样式 */
+    .today-patch-header {
+        background-color: #fff3cd !important;
+        border: 2px solid #ffb822 !important;
+        position: relative;
+        z-index: 11;
+        box-shadow: 0 4px 10px rgba(255, 184, 34, 0.3);
+    }
+    .today-patch-cell {
+        background-color: #fffdf5 !important;
+        border-left: 2px solid #ffb822 !important;
+        border-right: 2px solid #ffb822 !important;
+        position: relative;
+    }
+    /* 给最后一行加底边框，使其形成闭合效果 */
+    tbody tr:last-child .today-patch-cell {
+        border-bottom: 2px solid #ffb822 !important;
+    }
+</style>
+
+<script>
+    (function() {
+        // 1. 获取当前系统日期
+        const today = new Date();
+        
+        // 2. 课程表各周的起始周一日期（注意 JavaScript 中月份 2 代表 3月）
+        const weekStartDates = [
+            new Date(2026, 2, 2),  // 第1周 (3.2)
+            new Date(2026, 2, 9),  // 第2周 (3.9)
+            new Date(2026, 2, 16)  // 第3周 (3.16)
+        ];
+        
+        // 3. 算出今天是这15列课程中的哪一列（0-14）
+        let targetColIndex = -1;
+        
+        for (let w = 0; w < weekStartDates.length; w++) {
+            for (let d = 0; d < 5; d++) {
+                let checkDate = new Date(weekStartDates[w]);
+                checkDate.setDate(checkDate.getDate() + d);
+                
+                if (checkDate.getFullYear() === today.getFullYear() && 
+                    checkDate.getMonth() === today.getMonth() && 
+                    checkDate.getDate() === today.getDate()) {
+                    targetColIndex = w * 5 + d; // 找到目标列
+                    break;
+                }
+            }
+            if(targetColIndex !== -1) break;
+        }
+
+        // 4. 执行 DOM 高亮修改 (如果不在这三周内，则不执行任何操作)
+        if (targetColIndex !== -1) {
+            // 高亮表头 (定位到 thead 的第三行)
+            const headerRow = document.querySelector('thead tr:nth-child(3)');
+            if (headerRow) {
+                const headers = headerRow.querySelectorAll('.day-header');
+                if (headers[targetColIndex]) {
+                    headers[targetColIndex].classList.add('today-patch-header');
+                    headers[targetColIndex].innerHTML += '<br><span style="color:#d35400;font-size:12px;">(今日)</span>';
+                }
+            }
+            
+            // 高亮 tbody 单元格
+            const tbodyRows = document.querySelectorAll('tbody tr');
+            tbodyRows.forEach((row, rowIndex) => {
+                const cells = row.querySelectorAll('td');
+                // DOM树结构中：第一行（上午第一节）和第三行（下午第一节）首个 td 是"时段"，需要把索引往右平移一位 (+1)
+                let actualColIndex = (rowIndex === 0 || rowIndex === 2) ? targetColIndex + 1 : targetColIndex;
+                
+                if (cells[actualColIndex]) {
+                    cells[actualColIndex].classList.add('today-patch-cell');
+                }
+            });
+        }
+    })();
+</script>
+</body>
+</html>

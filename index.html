@@ -3,178 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 图像本地识别系统</title>
+    <title>本地 AI 图像分类器 (18+ 识别)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
     <style>
         :root {
-            --primary: #6366f1;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --danger: #EF4444;
+            --safe: #10B981;
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem;
+
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background: var(--card);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .header { text-align: center; margin-bottom: 2rem; }
-        .mode-switch {
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
             justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
-        button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            border: none;
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .status {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            height: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #F9FAFB;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 0;
+            text-align: center;
             cursor: pointer;
             font-weight: 600;
-            transition: 0.3s;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
         }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
-        .btn-outline.active { background: var(--primary); color: white; }
-        
-        #preview-container {
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--card-bg);
+        }
+
+        .content {
+            padding: 30px 20px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .upload-area {
+            border: 2px dashed #D1D5DB;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: #EEF2FF;
+        }
+
+        .upload-area input {
+            position: absolute;
             width: 100%;
-            height: 300px;
-            border: 2px dashed #475569;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            overflow: hidden;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
         }
-        img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            object-fit: cover;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-safe { background-color: var(--safe); }
+        .btn-safe:hover:not(:disabled) { background-color: #059669; }
         
-        .panel { display: none; }
-        .panel.active { display: block; }
-        
-        .status-bar {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: rgba(0,0,0,0.2);
-            border-radius: 0.5rem;
+        .btn-danger { background-color: var(--danger); }
+        .btn-danger:hover:not(:disabled) { background-color: #DC2626; }
+
+        .btn-primary { background-color: var(--primary); }
+        .btn-primary:hover:not(:disabled) { background-color: var(--primary-hover); }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: none;
+        }
+
+        .stats {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
             text-align: center;
         }
-        .loader { color: #94a3b8; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>本地图片自学习识别器</h1>
-        <p id="model-status" class="loader">正在加载 AI 模型，请稍候...</p>
+        <h2>本地 AI 图像分类器</h2>
+        <div class="status" id="status-text">正在加载 AI 模型，请稍候...</div>
     </div>
 
-    <div class="mode-switch">
-        <button id="btn-train" class="btn-outline active" onclick="switchMode('train')">学习模式</button>
-        <button id="btn-predict" class="btn-outline" onclick="switchMode('predict')">识别模式</button>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('learning')">学习模式</div>
+        <div class="tab" onclick="switchTab('recognition')">识别模式</div>
     </div>
 
-    <div id="preview-container">
-        <p id="placeholder">等待上传图片...</p>
-        <img id="main-img" src="" style="display:none;">
-    </div>
-
-    <input type="file" id="file-selector" accept="image/*" style="display:none;">
-    <button class="btn-primary" style="width:100%;" onclick="document.getElementById('file-selector').click()">选择图片</button>
-
-    <div id="train-panel" class="panel active">
-        <div style="display:flex; gap: 1rem; margin-top: 1rem;">
-            <button class="btn-primary" style="flex:1; background:#ef4444;" onclick="train(1)">标记为：限制级 (18+)</button>
-            <button class="btn-primary" style="flex:1; background:#22c55e;" onclick="train(0)">标记为：安全内容</button>
+    <div id="learning-content" class="content active">
+        <div class="upload-area">
+            <input type="file" id="learn-upload" accept="image/*" disabled>
+            <div id="learn-placeholder">点击或拖拽上传图片<br><small>支持 JPG, PNG</small></div>
+            <img id="learn-preview" class="preview-img" alt="预览">
         </div>
-        <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 1rem;">
-            * 在学习模式下，你上传图片并点击分类按钮，模型会记住这些特征。样本越多，识别越准。
-        </p>
+        
+        <div class="actions">
+            <button class="btn-safe" id="btn-learn-safe" disabled onclick="addExample('safe')">标记为：安全图片</button>
+            <button class="btn-danger" id="btn-learn-18plus" disabled onclick="addExample('18plus')">标记为：18+图片</button>
+        </div>
+        
+        <div class="stats" id="learn-stats">已学习: 安全(0) | 18+(0)</div>
     </div>
 
-    <div id="predict-panel" class="panel">
-        <div class="status-bar">
-            识别结果：<span id="result-text" style="font-weight:bold; color:var(--primary);">等待分析</span>
+    <div id="recognition-content" class="content">
+        <div class="upload-area">
+            <input type="file" id="recognize-upload" accept="image/*" disabled>
+            <div id="recognize-placeholder">点击或拖拽上传图片进行识别</div>
+            <img id="recognize-preview" class="preview-img" alt="预览">
         </div>
+
+        <div class="actions">
+            <button class="btn-primary" id="btn-predict" disabled onclick="predict()">开始识别</button>
+        </div>
+
+        <div class="result-box" id="result-box"></div>
     </div>
 </div>
 
 <script>
-    let net;
-    const classifier = knnClassifier.create();
-    const imgEl = document.getElementById('main-img');
-    const fileSelector = document.getElementById('file-selector');
+    let classifier;
+    let mobilenetModule;
+    let isModelLoaded = false;
+    let exampleCounts = { 'safe': 0, '18plus': 0 };
 
-    // 加载模型
-    async function app() {
-        console.log('Loading mobilenet..');
-        net = await mobilenet.load();
-        document.getElementById('model-status').innerText = '模型加载完成，可以开始！';
+    // 初始化模型
+    async function init() {
+        try {
+            document.getElementById('status-text').innerText = '正在加载特征提取模型 (初次加载可能需要几秒)...';
+            classifier = knnClassifier.create();
+            mobilenetModule = await mobilenet.load({version: 2, alpha: 1.0}); // 使用更精确的模型版本
+            isModelLoaded = true;
+            document.getElementById('status-text').innerText = '模型加载完毕，完全本地运行准备就绪！';
+            
+            // 启用上传输入框
+            document.getElementById('learn-upload').disabled = false;
+            document.getElementById('recognize-upload').disabled = false;
+        } catch (error) {
+            console.error('模型加载失败:', error);
+            document.getElementById('status-text').innerText = '模型加载失败，请检查网络连接。';
+        }
     }
 
-    // 处理文件上传
-    fileSelector.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            imgEl.src = event.target.result;
-            imgEl.style.display = 'block';
-            document.getElementById('placeholder').style.display = 'none';
-            // 如果是识别模式，自动触发预测
-            if(currentMode === 'predict') predict();
-        };
-        reader.readAsDataURL(file);
+    // 标签页切换逻辑
+    function switchTab(mode) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        
+        if (mode === 'learning') {
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.getElementById('learning-content').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab')[1].classList.add('active');
+            document.getElementById('recognition-content').classList.add('active');
+        }
+    }
+
+    // 处理图片上传与预览
+    function setupImageUpload(inputId, previewId, placeholderId, callback) {
+        document.getElementById(inputId).addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = document.getElementById(previewId);
+                img.src = event.target.result;
+                img.style.display = 'block';
+                document.getElementById(placeholderId).style.display = 'none';
+                
+                // 图片加载完成后触发回调（启用按钮）
+                img.onload = () => { if(callback) callback(img); };
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // 绑定学习模式的图片上传
+    setupImageUpload('learn-upload', 'learn-preview', 'learn-placeholder', (img) => {
+        if(isModelLoaded) {
+            document.getElementById('btn-learn-safe').disabled = false;
+            document.getElementById('btn-learn-18plus').disabled = false;
+        }
     });
 
-    let currentMode = 'train';
-    function switchMode(mode) {
-        currentMode = mode;
-        document.getElementById('train-panel').className = mode === 'train' ? 'panel active' : 'panel';
-        document.getElementById('predict-panel').className = mode === 'predict' ? 'panel active' : 'panel';
-        document.getElementById('btn-train').className = mode === 'train' ? 'btn-outline active' : 'btn-outline';
-        document.getElementById('btn-predict').className = mode === 'predict' ? 'btn-outline active' : 'btn-outline';
+    // 绑定识别模式的图片上传
+    setupImageUpload('recognize-upload', 'recognize-preview', 'recognize-placeholder', (img) => {
+        if(isModelLoaded) {
+            document.getElementById('btn-predict').disabled = false;
+            document.getElementById('result-box').style.display = 'none'; // 隐藏上次结果
+        }
+    });
+
+    // 学习模式：添加样本
+    async function addExample(classId) {
+        const img = document.getElementById('learn-preview');
+        
+        // 提取图片特征 (Activation)
+        const features = mobilenetModule.infer(img, true);
+        
+        // 将特征和标签加入 KNN 分类器
+        classifier.addExample(features, classId);
+        
+        // 更新统计数据
+        exampleCounts[classId]++;
+        document.getElementById('learn-stats').innerText = `已学习: 安全(${exampleCounts.safe}) | 18+(${exampleCounts.18plus})`;
+        
+        // 视觉反馈
+        document.getElementById('status-text').innerText = `✅ 成功学习一张【${classId === 'safe' ? '安全' : '18+'}】图片特征！`;
+        setTimeout(() => {
+            document.getElementById('status-text').innerText = '模型就绪。请继续添加或去识别。';
+        }, 2000);
     }
 
-    // 学习函数
-    async function train(labelId) {
-        if (!imgEl.src) { alert('请先上传图片'); return; }
-        const activation = net.infer(imgEl, 'conv_preds');
-        classifier.addExample(activation, labelId);
-        alert(`已学习该特征为：${labelId === 1 ? '18+' : '安全'}`);
-    }
-
-    // 识别函数
+    // 识别模式：进行预测
     async function predict() {
-        if (!imgEl.src) return;
         if (classifier.getNumClasses() === 0) {
-            document.getElementById('result-text').innerText = '请先在学习模式下喂给它一些图片';
+            alert('请先在"学习模式"中至少添加一张图片让 AI 学习！');
             return;
         }
-        const activation = net.infer(imgEl, 'conv_preds');
-        const result = await classifier.predictClass(activation);
-        const classes = ['安全内容', '限制级 (18+)'];
-        document.getElementById('result-text').innerText = classes[result.label];
+
+        const img = document.getElementById('recognize-preview');
+        document.getElementById('btn-predict').innerText = '分析中...';
+        document.getElementById('btn-predict').disabled = true;
+
+        try {
+            // 提取待识别图片的特征
+            const features = mobilenetModule.infer(img, true);
+            
+            // 使用 KNN 进行分类，k设为3（寻找最相似的3张图进行投票）
+            const result = await classifier.predictClass(features, 3);
+            
+            // 显示结果
+            const resultBox = document.getElementById('result-box');
+            resultBox.style.display = 'block';
+            
+            const confidence = (result.confidences[result.label] * 100).toFixed(1);
+            
+            if (result.label === '18plus') {
+                resultBox.style.backgroundColor = '#FEE2E2';
+                resultBox.style.color = '#B91C1C';
+                resultBox.innerHTML = `⚠️ 识别结果：18+ 内容 <br><span style="font-size:0.9em;font-weight:normal">相似度置信区间: ${confidence}%</span>`;
+            } else {
+                resultBox.style.backgroundColor = '#D1FAE5';
+                resultBox.style.color = '#047857';
+                resultBox.innerHTML = `✅ 识别结果：安全图片 <br><span style="font-size:0.9em;font-weight:normal">相似度置信区间: ${confidence}%</span>`;
+            }
+        } catch (error) {
+            console.error(error);
+            alert('识别出错，请确保图片已正确加载。');
+        } finally {
+            document.getElementById('btn-predict').innerText = '开始识别';
+            document.getElementById('btn-predict').disabled = false;
+        }
     }
 
-    app();
+    // 页面加载时初始化
+    window.onload = init;
 </script>
-
 </body>
 </html>

@@ -2,148 +2,355 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>系统动力引擎</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级智能量子挖矿机</title>
     <style>
-        :root { --primary: #007AFF; --danger: #FF3B30; --success: #4CD964; }
-        body { margin: 0; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden; }
+        :root {
+            --primary: #00ffcc;
+            --bg-color: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
         
-        /* 核心进度环 */
-        .monitor { margin-top: 60px; position: relative; width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; }
-        .circle-bg { fill: none; stroke: #222; stroke-width: 12; }
-        .circle-progress { fill: none; stroke: var(--primary); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 0.3s, stroke 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
-        .percentage { position: absolute; font-size: 48px; font-weight: 200; }
-        .status-tip { position: absolute; bottom: 40px; font-size: 14px; opacity: 0.6; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
 
-        /* 动态波浪效果 */
-        .wave-container { width: 100%; height: 100px; position: relative; overflow: hidden; }
+        /* 顶部时间栏 */
+        .header {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .title { font-size: 24px; font-weight: bold; background: linear-gradient(90deg, #00ffcc, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .clock { font-size: 20px; font-family: monospace; color: #94a3b8; }
 
-        /* 底部控制面板 */
-        .panel { width: 100%; padding-bottom: 50px; text-align: center; background: linear-gradient(to top, rgba(0,122,255,0.1), transparent); }
-        .btn { background: var(--primary); color: white; border: none; padding: 18px 80px; border-radius: 40px; font-size: 18px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,122,255,0.3); active { transform: scale(0.96); opacity: 0.9; } }
-        .info { margin-top: 20px; font-size: 12px; color: #666; }
+        /* 矿机区域 */
+        .machine-container {
+            margin: 50px 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
 
-        /* 极度卡顿时的视觉模拟 */
-        .glitch { animation: shake 0.1s infinite; }
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -1px); } }
+        .machine {
+            font-size: 100px;
+            text-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
+            animation: bounce 1s infinite alternate ease-in-out;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* 机器震动动画 */
+        @keyframes bounce {
+            0% { transform: translateY(0) scaleY(1); }
+            100% { transform: translateY(10px) scaleY(0.95); }
+        }
+
+        /* 动态冒烟效果 */
+        .smoke {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(5px);
+            animation: floatUp 3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+            100% { transform: translate(calc(-50px + 100px * var(--dir)), -200px) scale(3); opacity: 0; }
+        }
+
+        /* 状态提示 */
+        .status {
+            margin-top: 20px;
+            color: var(--primary);
+            font-size: 14px;
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        /* 矿物仓库面板 */
+        .inventory {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .resource-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
+
+        .resource-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.08); }
+        
+        .resource-icon { font-size: 30px; }
+        .resource-info { text-align: right; }
+        .resource-name { font-size: 14px; color: #94a3b8; margin-bottom: 5px; }
+        .resource-count { font-size: 24px; font-weight: bold; font-family: monospace; }
+
+        /* 离线收益弹窗 */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 0 50px rgba(0, 255, 204, 0.2);
+        }
+
+        .modal h2 { margin-bottom: 15px; color: var(--primary); }
+        .modal p { color: #cbd5e1; margin-bottom: 10px; line-height: 1.6;}
+        .modal button {
+            margin-top: 20px; padding: 10px 20px; background: var(--primary);
+            color: #0f172a; border: none; border-radius: 8px; font-weight: bold;
+            cursor: pointer; transition: 0.2s;
+        }
+        .modal button:hover { background: white; }
+
     </style>
 </head>
 <body>
 
-    <div class="monitor">
-        <svg width="240" height="240">
-            <circle class="circle-bg" cx="120" cy="120" r="100"></circle>
-            <circle id="prog" class="circle-progress" cx="120" cy="120" r="100" stroke-dasharray="628" stroke-dashoffset="628"></circle>
-        </svg>
-        <div class="percentage"><span id="num">0</span>%</div>
-        <div class="status-tip" id="state-text">内存健康</div>
+    <div class="header">
+        <div class="title">⚡ 量子挖矿中心</div>
+        <div class="clock" id="clock">00:00:00</div>
     </div>
 
-    <div id="visual-lag" style="width: 50px; height: 50px; background: var(--primary); border-radius: 10px;"></div>
+    <div class="machine-container">
+        <div class="machine" id="machine">🏭</div>
+        <div class="status">● 自动挖掘中，数据实时云存档...</div>
+    </div>
 
-    <div class="panel">
-        <button class="btn" id="main-btn">一键极致加速</button>
-        <div class="info">智能分析系统冗余缓存...</div>
+    <div class="inventory">
+        <div class="resource-card">
+            <div class="resource-icon">⚫</div>
+            <div class="resource-info">
+                <div class="resource-name">煤炭 (Coal)</div>
+                <div class="resource-count" id="count-coal">0</div>
+            </div>
+        </div>
+        <div class="resource-card">
+            <div class="resource-icon">⚪</div>
+            <div class="resource-info">
+                <div class="resource-name">铁矿 (Iron)</div>
+                <div class="resource-count" id="count-iron">0</div>
+            </div>
+        </div>
+        <div class="resource-card">
+            <div class="resource-icon">🟡</div>
+            <div class="resource-info">
+                <div class="resource-name">黄金 (Gold)</div>
+                <div class="resource-count" id="count-gold">0</div>
+            </div>
+        </div>
+        <div class="resource-card">
+            <div class="resource-icon">💎</div>
+            <div class="resource-info">
+                <div class="resource-name">钻石 (Diamond)</div>
+                <div class="resource-count" id="count-diamond">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="offlineModal">
+        <div class="modal-content">
+            <h2>欢迎回来，矿工！</h2>
+            <p id="offlineTimeMsg">你离开了一段时间...</p>
+            <p>你的机器坚持不懈，为你挖到了：</p>
+            <div id="offlineGains" style="font-weight: bold; margin: 15px 0;"></div>
+            <button onclick="document.getElementById('offlineModal').style.display='none'">收下奖励</button>
+        </div>
     </div>
 
     <script>
-        const prog = document.getElementById('prog');
-        const num = document.getElementById('num');
-        const stateText = document.getElementById('state-text');
-        const btn = document.getElementById('main-btn');
-        const box = document.getElementById('visual-lag');
+        // 游戏数据状态
+        let resources = { coal: 0, iron: 0, gold: 0, diamond: 0 };
+        let lastSaveTime = Date.now();
 
-        let memoryCache = [];
-        let percent = 0;
-        let isCleaning = false;
-        const totalSteps = 628;
-
-        // 核心渲染循环：用来观察掉帧
-        let angle = 0;
-        function animate() {
-            angle += 0.1;
-            box.style.transform = `rotate(${angle}rad) translateX(${Math.sin(angle)*20}px)`;
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        // 模拟内存压入
-        function simulateLoad() {
-            if(isCleaning) return;
-
-            if (percent < 98) {
-                percent += Math.random() * 1.5;
-                updateUI(percent);
-
-                // 注入 TypedArray 占用真实物理内存
-                // 每次增加约 16MB 的缓冲区
-                try {
-                    const buffer = new Uint32Array(4 * 1024 * 1024); 
-                    for(let i=0; i<buffer.length; i++) buffer[i] = i; 
-                    memoryCache.push(buffer);
-                } catch(e) {
-                    console.log("达到浏览器上限");
-                }
-
-                // 随着数值增加，动态调整视觉卡顿感
-                setTimeout(simulateLoad, Math.max(50, 200 - percent * 2));
-            } else {
-                stateText.innerText = "内存溢出危险！";
-                stateText.style.color = "var(--danger)";
-                document.body.classList.add('glitch');
-            }
-        }
-
-        function updateUI(p) {
-            const currentP = Math.min(Math.floor(p), 100);
-            num.innerText = currentP;
-            const offset = totalSteps - (currentP / 100) * totalSteps;
-            prog.style.strokeDashoffset = offset;
-
-            if(p > 80) prog.style.stroke = "var(--danger)";
-            else if(p > 50) prog.style.stroke = "orange";
-        }
-
-        // 清理逻辑
-        btn.onclick = () => {
-            isCleaning = true;
-            btn.innerText = "清理中...";
-            btn.style.background = "#333";
-            
-            // 关键：清空数组释放引用
-            memoryCache = [];
-            
-            // 模拟清理过程
-            let clearInt = setInterval(() => {
-                percent -= 5;
-                if (percent <= 0) {
-                    percent = 0;
-                    clearInterval(clearInt);
-                    finishCleaning();
-                }
-                updateUI(percent);
-            }, 30);
+        // 挖矿概率与每秒产出基础设定
+        const rates = {
+            coal: 5,       // 每秒大致 5 个
+            iron: 2,       // 每秒大致 2 个
+            gold: 0.5,     // 每两秒 1 个
+            diamond: 0.05  // 每 20 秒 1 个
         };
 
-        function finishCleaning() {
-            document.body.classList.remove('glitch');
-            prog.style.stroke = "var(--success)";
-            stateText.innerText = "清理完成，运行如飞";
-            btn.innerText = "已是最佳状态";
-            btn.style.background = "var(--success)";
+        // DOM 元素
+        const els = {
+            coal: document.getElementById('count-coal'),
+            iron: document.getElementById('count-iron'),
+            gold: document.getElementById('count-gold'),
+            diamond: document.getElementById('count-diamond'),
+            clock: document.getElementById('clock')
+        };
+
+        // --- 1. 更新当前时间显示 ---
+        function updateClock() {
+            const now = new Date();
+            els.clock.innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- 2. 动态冒烟效果 ---
+        function createSmoke() {
+            const machineContainer = document.querySelector('.machine-container');
+            const smoke = document.createElement('div');
+            smoke.classList.add('smoke');
             
-            setTimeout(() => {
-                isCleaning = false;
-                btn.innerText = "一键极致加速";
-                btn.style.background = "var(--primary)";
-                stateText.innerText = "内存健康";
-                prog.style.stroke = "var(--primary)";
-                simulateLoad(); // 重新开始压力测试循环
-            }, 2000);
+            // 随机大小和飘动方向
+            const size = Math.random() * 20 + 20; 
+            const dir = Math.random(); 
+            
+            smoke.style.width = `${size}px`;
+            smoke.style.height = `${size}px`;
+            smoke.style.top = '30px';
+            smoke.style.setProperty('--dir', dir); // 传给 CSS 动画
+            
+            machineContainer.appendChild(smoke);
+            
+            // 动画结束后移除元素
+            setTimeout(() => { smoke.remove(); }, 3000);
+        }
+        setInterval(createSmoke, 400); // 每 0.4 秒冒一个烟圈
+
+        // --- 3. 更新界面数字 ---
+        function updateUI() {
+            els.coal.innerText = Math.floor(resources.coal).toLocaleString();
+            els.iron.innerText = Math.floor(resources.iron).toLocaleString();
+            els.gold.innerText = Math.floor(resources.gold).toLocaleString();
+            els.diamond.innerText = Math.floor(resources.diamond).toLocaleString();
         }
 
-        // 启动测试
-        setTimeout(simulateLoad, 1000);
+        // --- 4. 核心挖矿逻辑 (含离线/切后台计算) ---
+        function calculateGains(seconds) {
+            let gained = { coal: 0, iron: 0, gold: 0, diamond: 0 };
+            // 引入一点随机性，基于流逝的秒数
+            gained.coal = seconds * rates.coal * (0.8 + Math.random() * 0.4);
+            gained.iron = seconds * rates.iron * (0.8 + Math.random() * 0.4);
+            gained.gold = seconds * rates.gold * (0.8 + Math.random() * 0.4);
+            gained.diamond = seconds * rates.diamond * (0.8 + Math.random() * 0.4);
+            return gained;
+        }
+
+        function mineTick() {
+            let now = Date.now();
+            let secondsPassed = (now - lastSaveTime) / 1000;
+            
+            // 为了防止时间跳跃（修改系统时间导致的巨大bug），做个限制，单次 tick 最多算 1 天
+            if(secondsPassed > 86400) secondsPassed = 86400; 
+            
+            if (secondsPassed >= 1) { // 每过 1 秒及以上计算一次
+                let gains = calculateGains(secondsPassed);
+                resources.coal += gains.coal;
+                resources.iron += gains.iron;
+                resources.gold += gains.gold;
+                resources.diamond += gains.diamond;
+                
+                lastSaveTime = now;
+                updateUI();
+                saveGame(); // 实时保存
+            }
+        }
+        // 使用 setInterval 模拟机器运转，即使用户切到其他标签页，浏览器限制了执行频率
+        // 下次执行时 secondsPassed 依然会根据时间戳补齐收益，完美实现“切出网页还在挖”！
+        setInterval(mineTick, 1000); 
+
+        // --- 5. 存档与读档 ---
+        function saveGame() {
+            const saveData = {
+                resources: resources,
+                lastSaveTime: lastSaveTime
+            };
+            localStorage.setItem('MinerGameSave_v1', JSON.stringify(saveData));
+        }
+
+        function loadGame() {
+            const savedString = localStorage.getItem('MinerGameSave_v1');
+            if (savedString) {
+                const saveData = JSON.parse(savedString);
+                resources = saveData.resources || resources;
+                
+                const now = Date.now();
+                const offlineSeconds = (now - saveData.lastSaveTime) / 1000;
+                
+                // 如果离线时间超过 60 秒，弹出离线收益报告
+                if (offlineSeconds > 60) {
+                    // 限制最大离线收益为 7 天
+                    const effectiveSeconds = Math.min(offlineSeconds, 86400 * 7); 
+                    const gains = calculateGains(effectiveSeconds);
+                    
+                    resources.coal += gains.coal;
+                    resources.iron += gains.iron;
+                    resources.gold += gains.gold;
+                    resources.diamond += gains.diamond;
+
+                    showOfflineModal(effectiveSeconds, gains);
+                }
+                
+                lastSaveTime = now;
+            }
+            updateUI();
+        }
+
+        function showOfflineModal(seconds, gains) {
+            let timeStr = "";
+            if (seconds < 3600) timeStr = `${Math.floor(seconds/60)} 分钟`;
+            else timeStr = `${(seconds/3600).toFixed(1)} 小时`;
+
+            document.getElementById('offlineTimeMsg').innerText = `你离开了 ${timeStr}...`;
+            document.getElementById('offlineGains').innerHTML = `
+                ⚫ 煤炭: +${Math.floor(gains.coal).toLocaleString()} <br>
+                ⚪ 铁矿: +${Math.floor(gains.iron).toLocaleString()} <br>
+                🟡 黄金: +${Math.floor(gains.gold).toLocaleString()} <br>
+                💎 钻石: +${Math.floor(gains.diamond).toLocaleString()}
+            `;
+            document.getElementById('offlineModal').style.display = 'flex';
+        }
+
+        // 初始化游戏
+        loadGame();
+
     </script>
 </body>
 </html>

@@ -347,3 +347,21 @@
 </script>
 </body>
 </html>
+<style>
+    /* 为主要容器和表格元素开启 GPU 硬件加速 */
+    .schedule-container, .table-wrapper, tbody td:hover, .today-patch-cell {
+        /* 触发 3D 变换，强制浏览器提取为独立的复合层，交由 GPU 处理 */
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        transform: translate3d(0, 0, 0);
+        
+        /* 提前告知浏览器这些元素的状态（如滚动、变换）可能发生改变 */
+        will-change: transform, scroll-position;
+        
+        /* 消除某些移动端设备开启 GPU 加速后可能导致的文字模糊或闪烁问题 */
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+    }
+</style>
